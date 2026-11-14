@@ -14,10 +14,30 @@ pathfinding enemy. Either way, the maze must keep a path open.
 
 ## Run
 
+Needs Python 3.11 or newer. Dependencies: numpy and matplotlib.
+
+**With uv** (recommended, uses the exact versions in `uv.lock`):
+
 ```
 uv run python experiments.py           # full run, ~15 min on one core
 uv run python experiments.py --quick   # smoke test, ~75 s
 ```
+
+The first `uv run` creates `.venv/` and installs everything.
+
+**With plain Python and pip:**
+
+```
+python -m venv .venv
+.venv\Scripts\activate                 # Windows
+source .venv/bin/activate              # macOS / Linux
+pip install -r requirements.txt
+python experiments.py --quick
+```
+
+If you add a dependency, run `uv add <package>`, then
+`uv export --no-hashes --no-header --no-annotate --no-emit-project -o requirements.txt`
+so both files stay in sync.
 
 Output goes to `out/`: five PNG figures, `evolution.gif`, `results.json`, `run_log.txt`.
 
