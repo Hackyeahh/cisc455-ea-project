@@ -1,10 +1,8 @@
-[  16.2s] GA runs done
-[  19.6s] GA figures done
-[  30.3s] NSGA-II runs done
-[  30.6s] NSGA-II figure done
-[ 147.8s] Robust GA runs done
-[ 149.7s] Decay test done
-[ 150.1s] Solver pool test done
-[ 161.4s] Path-cost GA runs done
-[ 183.2s] Path-cost experiments done
-[ 183.2s] Wrote C:\Users\henry\Documents\year-5-queens\cisc455\maze-demo\out
+[ 133.8s] GA runs done
+[ 142.2s] GA figures done
+[ 204.2s] NSGA-II runs done
+[ 204.8s] NSGA-II figure done
+[ 825.1s] Robust GA runs done
+[ 834.2s] Decay test done
+[ 834.6s] Robot pool test done
+[ 834.6s] Wrote C:\Users\henry\Documents\year-5-queens\cisc455\maze-demo\out

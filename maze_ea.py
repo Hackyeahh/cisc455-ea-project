@@ -1,71 +1,127 @@
-"""Evolve mazes that slow down a fixed pathfinding solver.
+"""Evolve mazes that slow down an exploring robot.
 
-Tower-defense framing: the EA "buys" walls and mud tiles to make a pathfinder
-work as hard as possible, but a path from start to goal must stay open.
+The robot does not know the maze. It assumes unseen tiles are open, plans a route
+to the goal with A*, walks, inspects the tiles next to it, and replans when it
+finds a wall on its route. The EA places walls to make the robot work as hard as
+possible, but a path from start to goal must stay open.
 
-Genotype : n x n int8 grid, 0 = floor, 1 = wall, 2 = mud (integer representation)
-Phenotype: the maze the solver searches
-Fitness  : number of nodes the solver expands (deterministic measure of search effort)
+Genotype : n x n binary grid, 0 = floor, 1 = wall
+Phenotype: the maze the robot explores
+Fitness  : robot cost = steps walked + distinct tiles inspected (physical work only;
+           the robot's planning computation is free)
 """
 from collections import deque
 from heapq import heappop, heappush
 
 import numpy as np
 
-FLOOR, WALL, MUD = 0, 1, 2
-STEP_COST = (1, 0, 5)      # cost to ENTER a tile; mud is slow (walls are never entered)
-BUILD_COST = (0, 1, 2)     # price to place a tile; mud costs more than a wall
-
-# The solver pool. The EA trains against SOLVERS["A*"] only; the rest test overfitting.
-SOLVERS = {
-    "A*": dict(wg=1, wh=1, deep_ties=True),               # A*, ties -> larger g
-    "A* (other tie-break)": dict(wg=1, wh=1, deep_ties=False),
-    "Greedy best-first": dict(wg=0, wh=1, deep_ties=True),
-}
+FLOOR, WALL = 0, 1
 
 
-# ----------------------------------------------------------------------------- solvers
-def search(grid, wg=1, wh=1, deep_ties=True):
-    """Best-first search on a 4-connected grid from top-left to bottom-right.
+def neighbours(u, n):
+    r, c = divmod(u, n)
+    if r > 0: yield u - n
+    if r < n - 1: yield u + n
+    if c > 0: yield u - 1
+    if c < n - 1: yield u + 1
 
-    priority = wg * g + wh * h, with h = Manhattan distance (admissible: every step costs >= 1).
-    wg=1, wh=1 is A*; wg=0, wh=1 is greedy best-first.
-    Returns dict(expanded=[cell order], path=[cells] or None, cost=float or None).
+
+# ----------------------------------------------------------------------------- planner
+def astar(walls, n, start, goal, deep_ties=True):
+    """A* on a 4-connected grid, unit step cost, Manhattan heuristic.
+
+    walls: flat list, 1 = blocked. Returns the path [start, ..., goal] or None.
+    deep_ties: on equal f, prefer the node with larger g (the usual choice).
     """
-    n = grid.shape[0]
-    tiles = grid.ravel().tolist()
-    goal = n * n - 1
-    g = [float("inf")] * (n * n)
-    parent = [-1] * (n * n)
-    closed = bytearray(n * n)
-    g[0] = 0
-    heap = [(wh * 2 * (n - 1), 0, 0, 0)]
-    order, counter = [], 0
+    gr, gc = divmod(goal, n)
+    g = {start: 0}
+    parent = {}
+    closed = set()
+    heap = [(0, 0, 0, start)]
+    counter = 0
     while heap:
         _, _, _, u = heappop(heap)
-        if closed[u]:
+        if u in closed:
             continue
-        closed[u] = 1
-        order.append(u)
         if u == goal:
-            break
-        r, c = divmod(u, n)
-        for v, ok in ((u - n, r > 0), (u + n, r < n - 1), (u - 1, c > 0), (u + 1, c < n - 1)):
-            if not ok or closed[v] or tiles[v] == WALL:
+            path = [u]
+            while path[-1] != start:
+                path.append(parent[path[-1]])
+            return path[::-1]
+        closed.add(u)
+        for v in neighbours(u, n):
+            if walls[v] or v in closed:
                 continue
-            ng = g[u] + STEP_COST[tiles[v]]
-            if ng < g[v]:
+            ng = g[u] + 1
+            if ng < g.get(v, 1 << 30):
                 g[v], parent[v] = ng, u
                 vr, vc = divmod(v, n)
-                h = (n - 1 - vr) + (n - 1 - vc)
                 counter += 1
-                heappush(heap, (wg * ng + wh * h, -ng if deep_ties else ng, counter, v))
-    else:
-        return dict(expanded=order, path=None, cost=None)
-    path = [goal]
-    while path[-1] != 0:
-        path.append(parent[path[-1]])
-    return dict(expanded=order, path=path[::-1], cost=g[goal])
+                heappush(heap, (ng + abs(gr - vr) + abs(gc - vc), -ng if deep_ties else ng, counter, v))
+    return None
+
+
+# ----------------------------------------------------------------------------- robot
+def explore(grid, deep_ties=True):
+    """Run the exploring robot from top-left to bottom-right.
+
+    The robot inspects its 4 neighbours at every cell it stands on. It replans only
+    when a newly seen wall lies on its remaining route. New information can only add
+    walls, so an unblocked route stays a shortest route on the known map. Replanning
+    every step would give the same route length; only tie-breaks between equal routes
+    can differ.
+    Returns dict(trail=[cells walked], inspected=[0/1 per cell], steps, inspections).
+    """
+    n = grid.shape[0]
+    truth = grid.ravel().tolist()
+    known = [0] * (n * n)              # 1 = known wall; unknown tiles are assumed open
+    seen = bytearray(n * n)
+    seen[0] = 1
+    goal, pos = n * n - 1, 0
+    trail, route, route_set = [0], [], set()
+    while pos != goal:
+        blocked_route = False
+        for v in neighbours(pos, n):
+            if not seen[v]:
+                seen[v] = 1
+                if truth[v] == WALL:
+                    known[v] = 1
+                    blocked_route |= v in route_set
+        if not route or blocked_route:
+            route = astar(known, n, pos, goal, deep_ties)
+            if route is None:          # cannot happen when the maze is solvable
+                return None
+            route = route[1:]
+            route_set = set(route)
+        pos = route.pop(0)
+        route_set.discard(pos)
+        trail.append(pos)
+    inspections = int(sum(seen))
+    return dict(trail=trail, inspected=seen, steps=len(trail) - 1, inspections=inspections,
+                cost=len(trail) - 1 + inspections)
+
+
+def wall_follower(grid):
+    """Classic maze robot: keep the right hand on a wall. Returns the number of steps.
+
+    Start and goal both touch the outer edge, so following the right-hand wall from
+    the start always reaches the goal when a path exists. A step cap guards against loops.
+    """
+    n = grid.shape[0]
+    moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]   # east, south, west, north (clockwise)
+    r = c = 0
+    heading, steps = 1, 0                        # start facing south
+    while (r, c) != (n - 1, n - 1):
+        for turn in (1, 0, -1, 2):               # right, straight, left, back
+            h = (heading + turn) % 4
+            nr, nc = r + moves[h][0], c + moves[h][1]
+            if 0 <= nr < n and 0 <= nc < n and grid[nr, nc] == FLOOR:
+                r, c, heading = nr, nc, h
+                steps += 1
+                break
+        if steps > 20 * n * n:
+            return None
+    return steps
 
 
 def walls_to_open(grid):
@@ -80,27 +136,24 @@ def walls_to_open(grid):
     dq = deque([0])
     while dq:
         u = dq.popleft()
-        r, c = divmod(u, n)
-        for v, ok in ((u - n, r > 0), (u + n, r < n - 1), (u - 1, c > 0), (u + 1, c < n - 1)):
-            if not ok:
-                continue
-            w = 1 if tiles[v] == WALL else 0
+        for v in neighbours(u, n):
+            w = tiles[v]
             if dist[u] + w < dist[v]:
                 dist[v] = dist[u] + w
                 (dq.appendleft if w == 0 else dq.append)(v)
     return dist[-1]
 
 
-def evaluate(grid, solver="A*"):
-    res = search(grid, **SOLVERS[solver])
-    res["expansions"] = len(res["expanded"])
-    res["blocked"] = 0 if res["path"] else walls_to_open(grid)
-    res["build_cost"] = build_cost(grid)
+def evaluate(grid, deep_ties=True):
+    """Robot cost plus the shortest path a robot that knew the map would walk."""
+    n = grid.shape[0]
+    res = dict(blocked=walls_to_open(grid), walls=int(grid.sum()))
+    if res["blocked"]:
+        return {**res, "cost": 0, "steps": 0, "inspections": 0, "shortest": None, "trail": None}
+    run = explore(grid, deep_ties)
+    res.update(run)
+    res["shortest"] = len(astar(grid.ravel().tolist(), n, 0, n * n - 1)) - 1
     return res
-
-
-def build_cost(grid):
-    return int((grid == WALL).sum() * BUILD_COST[WALL] + (grid == MUD).sum() * BUILD_COST[MUD])
 
 
 # ----------------------------------------------------------------------------- variation
@@ -109,9 +162,8 @@ def fix_ends(grid):
     return grid
 
 
-def random_maze(rng, n, p_wall=0.25, p_mud=0.05):
-    grid = rng.choice(3, size=(n, n), p=[1 - p_wall - p_mud, p_wall, p_mud]).astype(np.int8)
-    return fix_ends(grid)
+def random_maze(rng, n, p_wall=0.25):
+    return fix_ends((rng.random((n, n)) < p_wall).astype(np.int8))
 
 
 def crossover(rng, a, b, n_points=2):
@@ -124,25 +176,16 @@ def crossover(rng, a, b, n_points=2):
 
 
 def mutate(rng, grid, rate):
-    """Random resetting: each cell is redrawn from {floor, wall, mud} with probability `rate`."""
-    grid = grid.copy()
-    hit = rng.random(grid.shape) < rate
-    grid[hit] = rng.integers(0, 3, hit.sum())
+    """Bit-flip mutation: each cell flips wall <-> floor with probability `rate`."""
+    grid = grid ^ (rng.random(grid.shape) < rate).astype(np.int8)
     return fix_ends(grid)
 
 
 def repair_budget(rng, grid, budget):
-    """Fixed-budget repair: turn random obstacles back into floor until build cost <= budget."""
-    over = build_cost(grid) - budget
-    if over > 0:
-        cells = np.flatnonzero(grid.ravel() != FLOOR)
-        rng.shuffle(cells)
-        flat = grid.ravel()
-        for i in cells:
-            if over <= 0:
-                break
-            over -= BUILD_COST[flat[i]]
-            flat[i] = FLOOR
+    """Fixed-budget repair: remove random walls until the wall count <= budget."""
+    walls = np.flatnonzero(grid.ravel() == WALL)
+    if walls.size > budget:
+        grid.ravel()[rng.choice(walls, walls.size - budget, replace=False)] = FLOOR
     return grid
 
 
@@ -155,23 +198,17 @@ def decay(rng, grid, k):
 
 
 # ----------------------------------------------------------------------------- single-objective GA
-def objective_value(res, objective):
-    """'expansions' = solver search effort; 'path_cost' = travel time of the path the solver returns."""
-    return float(res["expansions"] if objective == "expansions" else res["cost"])
-
-
-def ga_fitness(res, objective="expansions"):
-    """Objective if solvable. Blocked mazes get a small graded score (fewer walls to open = better)."""
-    return objective_value(res, objective) if res["blocked"] == 0 else 1.0 / (1 + res["blocked"])
+def ga_fitness(res):
+    """Robot cost if solvable. Blocked mazes get a small graded score (fewer walls to open = better)."""
+    return float(res["cost"]) if res["blocked"] == 0 else 1.0 / (1 + res["blocked"])
 
 
 def run_ga(seed, n=21, mu=50, lam=20, gens=150, budget=160, rate=3 / 441,
-           parent_sel="fps", tournament_k=3, decay_k=0, decay_samples=0, snapshot_every=0,
-           objective="expansions"):
+           parent_sel="fps", tournament_k=3, decay_k=0, decay_samples=0, snapshot_every=0):
     """Steady-state GA: lam children replace the worst lam parents each generation.
 
     parent_sel  : "fps" (roulette wheel) or "tournament"
-    decay_k > 0 : noisy, robust fitness = mean expansions over `decay_samples` decayed copies.
+    decay_k > 0 : noisy, robust fitness = mean robot cost over `decay_samples` decayed copies.
                   All mazes in a generation share the same decay seeds (common random numbers),
                   and the whole population is re-evaluated every generation.
     """
@@ -179,14 +216,11 @@ def run_ga(seed, n=21, mu=50, lam=20, gens=150, budget=160, rate=3 / 441,
     pop = [repair_budget(rng, random_maze(rng, n), budget) for _ in range(mu)]
 
     def score(grid, gen):
-        if not decay_k:
-            return ga_fitness(evaluate(grid), objective)
         base = evaluate(grid)
-        if base["blocked"]:
-            return ga_fitness(base, objective)
-        vals = [objective_value(evaluate(decay(np.random.default_rng((seed, gen, s)), grid, decay_k)), objective)
-                for s in range(decay_samples)]
-        return float(np.mean(vals))
+        if not decay_k or base["blocked"]:
+            return ga_fitness(base)
+        return float(np.mean([evaluate(decay(np.random.default_rng((seed, gen, s)), grid, decay_k))["cost"]
+                              for s in range(decay_samples)]))
 
     fit = np.array([score(g, 0) for g in pop])
     history, snapshots = [], []
@@ -204,10 +238,9 @@ def run_ga(seed, n=21, mu=50, lam=20, gens=150, budget=160, rate=3 / 441,
         worst = np.argsort(fit)[:lam]
         for slot, kid, f in zip(worst, kids, kid_fit):
             pop[slot], fit[slot] = kid, f
-        best = int(np.argmax(fit))
         history.append((fit.max(), fit.mean()))
         if snapshot_every and (gen % snapshot_every == 0 or gen == gens - 1):
-            snapshots.append((gen, pop[best].copy()))
+            snapshots.append((gen, pop[int(np.argmax(fit))].copy()))
     best = int(np.argmax(fit))
     return dict(best=pop[best], history=np.array(history), snapshots=snapshots, pop=pop, fit=fit)
 
@@ -245,17 +278,15 @@ def crowding(F):
     return dist
 
 
-def nsga2_objectives(res, objective="expansions"):
-    """Minimize (-objective, build cost); constraint violation = walls to open."""
-    value = objective_value(res, objective) if res["blocked"] == 0 else 0.0
-    return (-value, res["build_cost"]), res["blocked"]
+def nsga2_objectives(res):
+    """Minimize (-robot cost, wall count); constraint violation = walls to open."""
+    return (-res["cost"], res["walls"]), res["blocked"]
 
 
-def run_nsga2(seed, n=21, mu=60, gens=150, rate=3 / 441, record_gens=(), objective="expansions"):
+def run_nsga2(seed, n=21, mu=60, gens=150, rate=3 / 441, record_gens=()):
     rng = np.random.default_rng(seed)
-    pop = [random_maze(rng, n, p_wall=rng.uniform(0.05, 0.45), p_mud=rng.uniform(0, 0.1))
-           for _ in range(mu)]
-    evals = [nsga2_objectives(evaluate(g), objective) for g in pop]
+    pop = [random_maze(rng, n, p_wall=rng.uniform(0.05, 0.45)) for _ in range(mu)]
+    evals = [nsga2_objectives(evaluate(g)) for g in pop]
     recorded = {}
 
     def rank_and_crowd(evals, dedupe=False):
@@ -286,7 +317,7 @@ def run_nsga2(seed, n=21, mu=60, gens=150, rate=3 / 441, record_gens=(), objecti
 
         kids = [mutate(rng, crossover(rng, pop[pick()], pop[pick()]), rate) for _ in range(mu)]
         merged = pop + kids
-        merged_evals = evals + [nsga2_objectives(evaluate(k), objective) for k in kids]
+        merged_evals = evals + [nsga2_objectives(evaluate(k)) for k in kids]
         m_fronts, _, m_crowd = rank_and_crowd(merged_evals, dedupe=True)
         keep = []
         for front in m_fronts:  # (mu + lambda) survivor selection by front, then crowding
