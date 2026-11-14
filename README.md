@@ -1,4 +1,4 @@
-# Maze evolution demo: slow down an exploring robot
+# Maze evolution demo: slow down an exploring robot :)
 
 A prototype for the CISC455 group project. An EA designs mazes. A fixed robot
 tries to cross each maze from the top-left to the bottom-right corner. The EA
