@@ -1,0 +1,8 @@
+[143s] solid budget   0: best cost 489, 426, 434, 407, 457 (mean 443)
+[143s] solid budget  10: best cost 481, 436, 442, 422, 392 (mean 435)
+[143s] solid budget  20: best cost 556, 487, 473, 479, 444 (mean 488)
+[143s] solid budget  40: best cost 617, 518, 500, 539, 507 (mean 536)
+[143s] solid budget 160: best cost 547, 677, 639, 568, 540 (mean 594)
+[184s] old mazes (evolved without hammer): cost 800 -> 185 when every wall is breakable
+[186s] budget 40: removing a solid wall drops cost by 39.1 on average; removing a breakable wall drops it by 34.2
+   share of walls whose change drops cost by >= 20: solid 39%, breakable 26%
