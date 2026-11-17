@@ -19,8 +19,10 @@ Needs Python 3.11 or newer. Dependencies: numpy and matplotlib.
 **With uv** (recommended, uses the exact versions in `uv.lock`):
 
 ```
-uv run python experiments.py           # full run, ~15 min on one core
-uv run python experiments.py --quick   # smoke test, ~75 s
+uv run python experiments.py           # full run, ~25 min on one core
+uv run python experiments.py --quick   # smoke test, ~85 s
+uv run python experiments.py --co-gens 150   # co-evolve as long as the GA (slower)
+uv run python experiments.py --ablate-memory # also co-evolve without dead-end memory (+~8 min)
 ```
 
 The first `uv run` creates `.venv/` and installs everything.
@@ -39,7 +41,7 @@ If you add a dependency, run `uv add <package>`, then
 `uv export --no-hashes --no-header --no-annotate --no-emit-project -o requirements.txt`
 so both files stay in sync.
 
-Output goes to `out/`: five PNG figures, `evolution.gif`, `results.json`, `run_log.txt`.
+Output goes to `out/`: seven PNG figures, `evolution.gif`, `results.json`, `run_log.txt`.
 
 ## EA design
 
@@ -57,6 +59,25 @@ Output goes to `out/`: five PNG figures, `evolution.gif`, `results.json`, `run_l
 | **NSGA-II** | Objectives: maximize robot cost, minimize wall count. Constraint domination on "walls to remove". μ = λ = 60. Duplicate objective vectors go to the back in survivor selection |
 | Generations | 150 |
 
+### Co-evolution (`coevolution.py`)
+
+The robot also evolves. Mazes and robots are two populations that are scored against each other.
+
+| Part | Choice |
+|---|---|
+| Robot genome | 8 real genes: `w_h` (heuristic weight, 0–3; 1 = standard A*), `p_unknown` (extra cost for stepping on an uninspected tile, 0–3), `p_visit` (extra cost per earlier visit of a tile, 0–3), `p_dead` (dead-end memory strength, 0–3; 0 = no memory), and 4 sort keys whose order sets the neighbour expansion order. `STANDARD_ROBOT` reproduces the original explorer exactly |
+| Robot behaviour | Same loop as before. Penalties are applied when a route is planned and the robot commits to it until a newly seen wall blocks it, so every robot still reaches the goal |
+| Dead-end memory | When a replan sends the robot back along the trail it just walked, the retraced tiles are a dead-end pocket. Each remembered tile adds heat to the tiles within 3 steps (fading with distance), and planning pays `p_dead × heat` to enter a tile. The robot then plans again with what it just learned. The memory lives for one run only. `run_coevolution(memory=False)` pins `p_dead` to 0 for an ablation |
+| Maze fitness | Mean robot cost against a panel of robots (maximize). Same maze genome and operators as the GA, tournament k = 3 |
+| Robot fitness | Mean **cost / shortest path** against a panel of mazes (minimize). Normalized, so a robot is not punished for drawing a hard maze |
+| Robot operators | BLX-0.25 blend crossover, Gaussian mutation (p = 0.3 per gene, σ = 0.1 of the range), tournament k = 3 |
+| Panels | 5 opponents per individual: top 2, 2 random, 1 from the hall of fame (best individual of every earlier generation) |
+| Survivors | (μ + λ) truncation, μ = 30, λ = 15 on each side. Parents and children play the same panel in a generation. One maze × robot cost cache serves both sides |
+| Generations | 60 (about 2.5 s each) |
+
+Raw fitness moves with the panel, so progress is measured with a **master tournament**:
+every generation's best maze against every generation's best robot.
+
 ## Experiments
 
 1. **Random vs. evolved** (`fig1`). Same wall budget.
@@ -64,6 +85,8 @@ Output goes to `out/`: five PNG figures, `evolution.gif`, `results.json`, `run_l
 3. **NSGA-II front** (`fig3`). Robot cost vs. number of walls, with four mazes from the front.
 4. **Wall decay** (`fig4`). Remove k random walls and run the robot again. Compares normal evolved mazes, mazes evolved with decay in the fitness (mean over 3 samples of 3 removed walls, shared seeds per generation, survivors re-evaluated), and random mazes.
 5. **Robot pool** (`fig5`). Steps walked on the same mazes by the trained explorer, a wall follower (right-hand rule), and a robot that knows the map.
+6. **Co-evolution** (`fig6`). Master tournament heatmap (maze generation × robot generation) and the planner genes of the best robot over time. `results.json` stores `maze_progress` (later mazes vs. first mazes, averaged over robots; above 1 = mazes got harder) and `robot_progress` (later robots vs. first robots, averaged over mazes; below 1 = robots got better).
+7. **Does co-evolution fix the overfitting?** (`fig7`). Steps walked by the standard explorer, a co-evolved explorer, the wall follower and the map-knowing robot on mazes evolved against the fixed explorer, co-evolved mazes, and random mazes. The co-evolved mazes get 60 generations by default, the GA mazes 150. Use `--co-gens 150` for a matched comparison.
 
 ## Results (seeds 0–4, 150 generations)
 
@@ -124,5 +147,6 @@ follower instead.
 
 ## Files
 
-- `maze_ea.py`: robot, planner, operators, GA, NSGA-II
+- `maze_ea.py`: robot (with its gene vector), planner, operators, GA, NSGA-II
+- `coevolution.py`: co-evolution of mazes and robots, master tournament
 - `experiments.py`: runs all experiments and draws the figures

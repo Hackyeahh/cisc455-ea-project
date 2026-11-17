@@ -1,7 +1,9 @@
 """Run every experiment and write figures + results.json into ./out.
 
-    uv run python experiments.py            # full run (a few minutes, single core)
-    uv run python experiments.py --quick    # smoke test
+    uv run python experiments.py            # full run (~25 min, single core)
+    uv run python experiments.py --quick    # smoke test (~85 s)
+    uv run python experiments.py --co-gens 150   # co-evolve as long as the GA (slower)
+    uv run python experiments.py --ablate-memory # also run co-evolution without dead-end memory
 """
 import argparse
 import json
@@ -17,7 +19,9 @@ from matplotlib.colors import to_rgb
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from maze_ea import WALL, decay, evaluate, random_maze, repair_budget, run_ga, run_nsga2, wall_follower
+from coevolution import master_tournament, run_coevolution
+from maze_ea import (ROBOT_NAMES, WALL, decay, evaluate, explore, random_maze, repair_budget, run_ga,
+                     run_nsga2, wall_follower)
 
 OUT = Path(__file__).parent / "out"
 N, BUDGET = 21, 160
@@ -104,6 +108,29 @@ def nsga_figure(run, record, fname):
     fig.savefig(OUT / fname, dpi=150); plt.close(fig)
 
 
+def coevo_figure(run, fname):
+    """Master tournament heatmap (left) and the best robot's planner genes over time (right)."""
+    gens, cost, _ = master_tournament(run)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.5, 4.6), gridspec_kw=dict(width_ratios=[1.1, 1]))
+    im = ax1.imshow(cost, origin="lower", cmap="Blues", aspect="auto")
+    ticks = list(range(0, len(gens), max(1, len(gens) // 6)))
+    ax1.set_xticks(ticks, [gens[i] for i in ticks])
+    ax1.set_yticks(ticks, [gens[i] for i in ticks])
+    ax1.set(xlabel="Maze generation  →  later mazes", ylabel="Robot generation  →  later robots",
+            title="Master tournament: robot cost of every best robot on every best maze (seed 0)")
+    ax1.title.set_fontsize(9.5)
+    ax1.grid(False)
+    fig.colorbar(im, ax=ax1, label="Robot cost (steps + inspections)")
+    genes = run["gene_history"]
+    for k, color in zip(range(4), (BLUE, ORANGE, AQUA, INK2)):      # w_h, p_unknown, p_visit, p_dead
+        ax2.plot(np.arange(len(genes)), genes[:, k], color=color, ls="--" if k == 3 else "-")
+        ax2.annotate(ROBOT_NAMES[k], (len(genes) - 1, genes[-1, k]), xytext=(6, 0),
+                     textcoords="offset points", va="center", fontsize=9, color=INK)
+    ax2.set(xlabel="Generation", ylabel="Gene value of the best robot", title="Planner genes of the best robot")
+    ax2.set_xlim(0, len(genes) * 1.2)
+    fig.tight_layout(); fig.savefig(OUT / fname, dpi=150); plt.close(fig)
+
+
 # ----------------------------------------------------------------------------- experiments
 def budget_random_mazes(count, seed=999):
     rng = np.random.default_rng(seed)
@@ -115,7 +142,7 @@ def budget_random_mazes(count, seed=999):
     return mazes
 
 
-def main(quick):
+def main(quick, co_gens=None, ablate_memory=False):
     OUT.mkdir(exist_ok=True)
     gens = 30 if quick else 150
     seeds = [0, 1] if quick else [0, 1, 2, 3, 4]
@@ -220,6 +247,68 @@ def main(quick):
     fig.tight_layout(); fig.savefig(OUT / "fig5_robot_pool.png", dpi=150); plt.close(fig)
     log("Robot pool test done")
 
+    # --- 6. Co-evolution: mazes and robots evolve together ----------------------------------
+    co_gens = co_gens or (10 if quick else 60)   # each generation costs ~2.5 s; 150 would match the GA
+    co =[run_coevolution(s, n=N, gens=co_gens, budget=BUDGET) for s in seeds[:3]]
+    log("Co-evolution runs done")
+    coevo_figure(co[0], "fig6_coevolution.png")
+    results["coevolution"] = []
+    for s, run in zip(seeds, co):
+        gens_m, cost, norm = master_tournament(run)
+        results["coevolution"].append(dict(
+            seed=s, generations=co_gens, explore_calls=run["evals"],
+            best_robot_genes={k: float(v) for k, v in zip(ROBOT_NAMES, run["bots"][0].genes)},
+            p_dead_history=[round(float(x), 3) for x in run["gene_history"][:, 3]],   # best robot's memory gene
+            master_generations=gens_m, master_cost=cost.tolist(),
+            # > 1: later mazes cost the field of robots more; < 1: later robots cost less on the field of mazes
+            maze_progress=float(cost[:, -1].mean() / cost[:, 0].mean()),
+            robot_progress=float(cost[-1, :].mean() / cost[0, :].mean())))
+        log(f"  seed {s}: later mazes cost x{results['coevolution'][-1]['maze_progress']:.2f}, "
+            f"later robots cost x{results['coevolution'][-1]['robot_progress']:.2f}")
+
+    if ablate_memory:   # same seeds, memory gene pinned to 0 (adds ~2.5 s per generation per seed)
+        results["coevolution_no_memory"] = []
+        ablation = [run_coevolution(s, n=N, gens=co_gens, budget=BUDGET, memory=False) for s in seeds[:3]]
+        for s, run in zip(seeds, ablation):
+            _, cost, _ = master_tournament(run)
+            results["coevolution_no_memory"].append(dict(
+                seed=s, maze_progress=float(cost[:, -1].mean() / cost[:, 0].mean()),
+                robot_progress=float(cost[-1, :].mean() / cost[0, :].mean())))
+        log("No-memory ablation done: maze/robot progress with memory "
+            + ", ".join(f"{r['maze_progress']:.2f}/{r['robot_progress']:.2f}" for r in results["coevolution"])
+            + " vs. without "
+            + ", ".join(f"{r['maze_progress']:.2f}/{r['robot_progress']:.2f}" for r in results["coevolution_no_memory"]))
+
+    # --- 7. Does co-evolution fix the overfitting? Same mazes, different robots ------------
+    co_mazes = [m.grid for run in co for m in run["mazes"][:2]]      # top 2 final mazes of each seed
+    co_bots = [run["bots"][0].genes for run in co]                   # best final robot of each seed
+    mazes7 = {"Evolved vs. fixed explorer": ([r["best"] for r in ga["tournament"]], BLUE),
+              "Co-evolved": (co_mazes, ORANGE),
+              "Random, same budget": (randoms[:5], AQUA)}
+    robots7 = {"Standard\nexplorer": lambda m: evaluate(m)["steps"],
+               "Co-evolved\nexplorer": lambda m: float(np.mean([explore(m, b)["steps"] for b in co_bots])),
+               "Wall follower\n(right-hand rule)": wall_follower,
+               "Robot that\nknows the map": lambda m: evaluate(m)["shortest"]}
+    pool7 = {name: {r: float(np.mean([f(m) for m in mz])) for r, f in robots7.items()}
+             for name, (mz, _) in mazes7.items()}
+    cost7 = {name: dict(standard=float(np.mean([evaluate(m)["cost"] for m in mz])),
+                        coevolved=float(np.mean([explore(m, b)["cost"] for m in mz for b in co_bots])))
+             for name, (mz, _) in mazes7.items()}
+    results["coevolution_transfer"] = dict(
+        steps={g: {r.replace("\n", " "): v for r, v in d.items()} for g, d in pool7.items()},
+        explorer_cost=cost7)
+    fig, ax = plt.subplots(figsize=(9, 4.6))
+    width, x = 0.26, np.arange(len(robots7))
+    for j, (name, (_, color)) in enumerate(mazes7.items()):
+        bars = ax.bar(x + (j - 1) * width, [pool7[name][r] for r in robots7], width - 0.02, color=color, label=name)
+        ax.bar_label(bars, fmt="%.0f", fontsize=8, color=INK2, padding=2)
+    ax.set_xticks(x, list(robots7))
+    ax.set(ylabel="Mean steps walked", title="Co-evolution: same mazes, different robots")
+    ax.grid(axis="x", visible=False)
+    ax.legend(loc="upper right")
+    fig.tight_layout(); fig.savefig(OUT / "fig7_coevolution_transfer.png", dpi=150); plt.close(fig)
+    log("Co-evolution transfer test done")
+
     (OUT / "results.json").write_text(json.dumps(results, indent=2))
     log(f"Wrote {OUT}")
 
@@ -227,4 +316,9 @@ def main(quick):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--quick", action="store_true")
-    main(p.parse_args().quick)
+    p.add_argument("--co-gens", type=int, default=None,
+                   help="co-evolution generations (default 60, or 10 with --quick; 150 matches the GA)")
+    p.add_argument("--ablate-memory", action="store_true",
+                   help="also co-evolve with the dead-end memory gene pinned to 0 and compare")
+    args = p.parse_args()
+    main(args.quick, args.co_gens, args.ablate_memory)

@@ -17,21 +17,50 @@ import numpy as np
 
 FLOOR, WALL = 0, 1
 
+# ----------------------------------------------------------------------------- robot genome
+# A robot is a real-valued vector of 8 genes that parametrizes its planner:
+#   w_h        heuristic weight. 1 = standard A*, 0 = Dijkstra-like, > 1 = greedy
+#   p_unknown  extra step cost for entering a tile the robot has not inspected yet
+#   p_visit    extra step cost per earlier visit of a tile (discourages backtracking)
+#   p_dead     dead-end memory. Extra step cost near tiles of pockets the robot had to back
+#              out of earlier in this run (0 = no memory, see DEAD_RADIUS)
+#   key_N/S/W/E  sort keys; argsort gives the order A* expands neighbours in
+ROBOT_NAMES = ("w_h", "p_unknown", "p_visit", "p_dead", "key_N", "key_S", "key_W", "key_E")
+ROBOT_LOW = np.zeros(8)
+ROBOT_HIGH = np.array([3.0, 3.0, 3.0, 3.0, 1.0, 1.0, 1.0, 1.0])
+# Plain A*, original neighbour order (N, S, W, E), no memory. Behaves exactly like the old explorer.
+STANDARD_ROBOT = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 1 / 3, 2 / 3, 1.0])
+DEFAULT_ORDER = (0, 1, 2, 3)
+DEAD_RADIUS = 3    # a remembered dead tile raises the cost of tiles within this Manhattan distance
 
-def neighbours(u, n):
+
+def neighbours(u, n, order=DEFAULT_ORDER):
+    """Neighbours of tile u. order is a permutation of (0=N, 1=S, 2=W, 3=E)."""
     r, c = divmod(u, n)
-    if r > 0: yield u - n
-    if r < n - 1: yield u + n
-    if c > 0: yield u - 1
-    if c < n - 1: yield u + 1
+    cand = (u - n if r > 0 else -1, u + n if r < n - 1 else -1,
+            u - 1 if c > 0 else -1, u + 1 if c < n - 1 else -1)
+    for i in order:
+        if cand[i] >= 0:
+            yield cand[i]
+
+
+def decode_robot(robot):
+    """Gene vector -> (w_h, p_unknown, p_visit, p_dead, neighbour order)."""
+    robot = STANDARD_ROBOT if robot is None else robot
+    return (float(robot[0]), float(robot[1]), float(robot[2]), float(robot[3]),
+            tuple(int(i) for i in np.argsort(robot[4:], kind="stable")))
 
 
 # ----------------------------------------------------------------------------- planner
-def astar(walls, n, start, goal, deep_ties=True):
-    """A* on a 4-connected grid, unit step cost, Manhattan heuristic.
+def astar(walls, n, start, goal, deep_ties=True, w_h=1.0, extra=None, order=DEFAULT_ORDER):
+    """A* on a 4-connected grid, Manhattan heuristic.
 
     walls: flat list, 1 = blocked. Returns the path [start, ..., goal] or None.
     deep_ties: on equal f, prefer the node with larger g (the usual choice).
+    w_h:   priority = g + w_h * h. 1 is standard A*; other values give a different robot.
+    extra: optional flat list of extra step cost for entering each tile (None = unit cost).
+    order: neighbour expansion order (permutation of 0..3).
+    Step costs stay >= 1, so a path is always found when one exists.
     """
     gr, gc = divmod(goal, n)
     g = {start: 0}
@@ -49,36 +78,79 @@ def astar(walls, n, start, goal, deep_ties=True):
                 path.append(parent[path[-1]])
             return path[::-1]
         closed.add(u)
-        for v in neighbours(u, n):
+        for v in neighbours(u, n, order):
             if walls[v] or v in closed:
                 continue
-            ng = g[u] + 1
+            ng = g[u] + 1 + (extra[v] if extra else 0)
             if ng < g.get(v, 1 << 30):
                 g[v], parent[v] = ng, u
                 vr, vc = divmod(v, n)
                 counter += 1
-                heappush(heap, (ng + abs(gr - vr) + abs(gc - vc), -ng if deep_ties else ng, counter, v))
+                heappush(heap, (ng + w_h * (abs(gr - vr) + abs(gc - vc)), -ng if deep_ties else ng, counter, v))
     return None
 
 
 # ----------------------------------------------------------------------------- robot
-def explore(grid, deep_ties=True):
+def explore(grid, robot=None, deep_ties=True):
     """Run the exploring robot from top-left to bottom-right.
 
+    robot: gene vector (see ROBOT_NAMES). None = STANDARD_ROBOT, the original explorer.
+
     The robot inspects its 4 neighbours at every cell it stands on. It replans only
-    when a newly seen wall lies on its remaining route. New information can only add
-    walls, so an unblocked route stays a shortest route on the known map. Replanning
-    every step would give the same route length; only tie-breaks between equal routes
-    can differ.
-    Returns dict(trail=[cells walked], inspected=[0/1 per cell], steps, inspections).
+    when a newly seen wall lies on its remaining route, and it commits to its route
+    until then. For the standard robot, new information can only add walls, so an
+    unblocked route stays a shortest route on the known map. For robots with
+    p_unknown, p_visit or p_dead > 0 the penalties are applied when the plan is made, so a
+    committed route can be stale; that is part of the robot's behaviour.
+    Every replan is caused by a newly found wall, so the run always ends at the goal.
+
+    Dead-end memory (p_dead > 0). After a replan, if the new route starts by walking back
+    along the trail, the tiles it retraces are a dead-end pocket. The robot remembers them in
+    a heat map: every pocket tile adds heat to the tiles within DEAD_RADIUS, fading with
+    distance. Planning then pays p_dead * heat to enter a tile, so after being fooled by one
+    pocket the robot prefers routes that avoid its neighbourhood (where evolved mazes tend to
+    put more pockets). The route is planned again once with the new memory.
+
+    Returns dict(trail=[cells walked], inspected=[0/1 per cell], steps, inspections, cost,
+    dead=number of remembered dead tiles, dead_tiles=[their cell indices]).
     """
+    w_h, p_unknown, p_visit, p_dead, order = decode_robot(robot)
     n = grid.shape[0]
     truth = grid.ravel().tolist()
     known = [0] * (n * n)              # 1 = known wall; unknown tiles are assumed open
     seen = bytearray(n * n)
     seen[0] = 1
+    visits = [0] * (n * n)
+    visits[0] = 1
+    heat = [0.0] * (n * n)             # dead-end memory: how close each tile is to remembered pockets
+    dead = bytearray(n * n)
     goal, pos = n * n - 1, 0
     trail, route, route_set = [0], [], set()
+
+    def plan(start):
+        extra = None
+        if p_unknown or p_visit or p_dead:
+            extra = [p_unknown * (1 - s) + p_visit * k + p_dead * h for s, k, h in zip(seen, visits, heat)]
+        return astar(known, n, start, goal, deep_ties, w_h, extra, order)
+
+    def remember_pocket(path):
+        """If path (starting at the robot) walks back along the trail, remember the retraced tiles."""
+        k = 0
+        while k + 2 <= len(trail) and k + 1 < len(path) and path[k + 1] == trail[-2 - k]:
+            k += 1
+        added = False
+        for t in trail[len(trail) - k:] if k else ():       # the k tiles the robot is about to leave
+            if dead[t]:
+                continue
+            dead[t] = added = 1
+            tr, tc = divmod(t, n)
+            for dr in range(-DEAD_RADIUS, DEAD_RADIUS + 1):
+                span = DEAD_RADIUS - abs(dr)
+                if 0 <= tr + dr < n:
+                    for dc in range(-span, span + 1):
+                        if 0 <= tc + dc < n:
+                            heat[(tr + dr) * n + tc + dc] += (DEAD_RADIUS + 1 - abs(dr) - abs(dc)) / (DEAD_RADIUS + 1)
+        return added
     while pos != goal:
         blocked_route = False
         for v in neighbours(pos, n):
@@ -88,17 +160,21 @@ def explore(grid, deep_ties=True):
                     known[v] = 1
                     blocked_route |= v in route_set
         if not route or blocked_route:
-            route = astar(known, n, pos, goal, deep_ties)
+            route = plan(pos)
             if route is None:          # cannot happen when the maze is solvable
                 return None
+            if p_dead and remember_pocket(route):
+                route = plan(pos)      # plan again with what the pocket just taught the robot
             route = route[1:]
             route_set = set(route)
         pos = route.pop(0)
         route_set.discard(pos)
+        visits[pos] += 1
         trail.append(pos)
     inspections = int(sum(seen))
     return dict(trail=trail, inspected=seen, steps=len(trail) - 1, inspections=inspections,
-                cost=len(trail) - 1 + inspections)
+                cost=len(trail) - 1 + inspections, dead=int(sum(dead)),
+                dead_tiles=[t for t in range(n * n) if dead[t]])
 
 
 def wall_follower(grid):
@@ -144,13 +220,16 @@ def walls_to_open(grid):
     return dist[-1]
 
 
-def evaluate(grid, deep_ties=True):
-    """Robot cost plus the shortest path a robot that knew the map would walk."""
+def evaluate(grid, robot=None, deep_ties=True):
+    """Robot cost plus the shortest path a robot that knew the map would walk.
+
+    robot: gene vector, or None for the standard explorer.
+    """
     n = grid.shape[0]
     res = dict(blocked=walls_to_open(grid), walls=int(grid.sum()))
     if res["blocked"]:
         return {**res, "cost": 0, "steps": 0, "inspections": 0, "shortest": None, "trail": None}
-    run = explore(grid, deep_ties)
+    run = explore(grid, robot, deep_ties)
     res.update(run)
     res["shortest"] = len(astar(grid.ravel().tolist(), n, 0, n * n - 1)) - 1
     return res
