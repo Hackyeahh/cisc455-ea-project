@@ -1,0 +1,14 @@
+[28s] test sets ready (3 evolved mazes)
+[294s] E1 random mazes: no coins (original robot) 72, never detours 73, greedy 71, evolved robot 69, evolved robot, shop closed 72 | best robot: greed 1.0 · sensors 0 · smash 2.5
+[462s] E1 evolved mazes: no coins (original robot) 379, never detours 220, greedy 296, evolved robot 187, evolved robot, shop closed 352 | best robot: greed 11.9 · sensors 0 · smash 5.3
+[763s] E2 coevolution done
+[1043s] E2 one-sided baseline done
+   original (no detour)     coevolved mazes:  254.6  mazes evolved vs E1 robot:  260.8  anti-explorer mazes:  220.2  random mazes:   72.7
+   greedy                   coevolved mazes:  243.9  mazes evolved vs E1 robot:  224.4  anti-explorer mazes:  296.3  random mazes:   71.4
+   E1 robot                 coevolved mazes:  214.4  mazes evolved vs E1 robot:  243.8  anti-explorer mazes:  187.1  random mazes:   68.0
+   coevolved robot s0       coevolved mazes:  211.8  mazes evolved vs E1 robot:  241.7  anti-explorer mazes:  191.0  random mazes:   70.8
+   coevolved robot s1       coevolved mazes:  215.6  mazes evolved vs E1 robot:  188.2  anti-explorer mazes:  202.1  random mazes:   69.5
+   coevolved robot s2       coevolved mazes:  208.8  mazes evolved vs E1 robot:  196.9  anti-explorer mazes:  237.9  random mazes:   69.2
+[1645s] E3 bait runs done
+[1645s] E3 greedy robot cost: bait 301, random coins 312, bait maze with coins removed 246 | median coin detour: bait 8, random 6
+   coevolved robot greed: bait [15.5  5.  12.7], random coins [ 9.6 17.1  2.6]
