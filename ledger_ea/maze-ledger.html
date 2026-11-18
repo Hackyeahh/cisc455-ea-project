@@ -1,0 +1,618 @@
+<title>Maze Ledger</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting-table workbench. Board on the left, ledger (tools, budget, clock, log) on the right. */
+:root {
+  --bg: #eef1ec; --panel: #fbfcfa; --fg: #17212a; --muted: #5a6a70; --line: #d3dad3;
+  --floor: #f7f9f5; --gridline: #e1e6df; --wall: #22303a; --fog: rgba(30, 44, 54, 0.42);
+  --accent: #0d8285; --accent-soft: #d3ecea; --trap: #e05a1c; --trap-soft: #fbe2d4;
+  --coin: #c08f00; --coin-soft: #f8edc8; --good: #23804f; --bad: #c0392f; --bad-soft: #f7dcd8;
+  --zone: rgba(224, 90, 28, 0.10);
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1519; --panel: #161e23; --fg: #e3eaec; --muted: #93a3a9; --line: #2a363d;
+  --floor: #1a2329; --gridline: #222d33; --wall: #8597a2; --fog: rgba(4, 8, 10, 0.55);
+  --accent: #3cc4c4; --accent-soft: #163b3d; --trap: #ff7a3d; --trap-soft: #3d2416;
+  --coin: #f0c33c; --coin-soft: #3a3115; --good: #4cc489; --bad: #ff6b5e; --bad-soft: #3d1c19;
+  --zone: rgba(255, 122, 61, 0.10); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1519; --panel: #161e23; --fg: #e3eaec; --muted: #93a3a9; --line: #2a363d;
+  --floor: #1a2329; --gridline: #222d33; --wall: #8597a2; --fog: rgba(4, 8, 10, 0.55);
+  --accent: #3cc4c4; --accent-soft: #163b3d; --trap: #ff7a3d; --trap-soft: #3d2416;
+  --coin: #f0c33c; --coin-soft: #3a3115; --good: #4cc489; --bad: #ff6b5e; --bad-soft: #3d1c19;
+  --zone: rgba(255, 122, 61, 0.10); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header h1 { font-family: var(--display); font-weight: 800; font-size: clamp(26px, 4vw, 36px); margin: 0; letter-spacing: -0.01em; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; text-wrap: pretty; }
+.rule-line { font-family: var(--mono); font-size: 12.5px; color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; padding: 6px 10px; display: inline-flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; }
+.rule-line b { font-weight: 500; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.board-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.board-frame { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+canvas#board { display: block; width: 100%; max-width: 640px; aspect-ratio: 1; margin: 0 auto; touch-action: none; cursor: crosshair; border-radius: 3px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.controls input[type=range] { flex: 1 1 160px; min-width: 120px; accent-color: var(--accent); }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card h2 { font-family: var(--display); font-weight: 600; font-size: 15px; margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card h2 small { font-family: var(--body); font-weight: 400; font-size: 12px; color: var(--muted); }
+button { font: 500 13px var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 7px 11px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--muted); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 600; }
+select, input[type=number], textarea { font: 13px var(--body); color: var(--fg); background: var(--floor); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; }
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.tool { display: grid; grid-template-columns: 22px 1fr; grid-template-rows: auto auto; column-gap: 8px; text-align: left; padding: 8px; }
+.tool .sw { grid-row: span 2; width: 22px; height: 22px; border-radius: 4px; align-self: center; position: relative; }
+.tool .nm { font-weight: 600; }
+.tool .pr { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.tool[aria-pressed=true] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.sw.wall { background: var(--wall); }
+.sw.trap { background: var(--trap-soft); border: 2px solid var(--trap); }
+.sw.coin { background: var(--coin); border-radius: 50%; box-shadow: inset 0 0 0 3px var(--coin-soft); }
+.sw.erase { background: var(--floor); border: 1px dashed var(--muted); }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.meter { position: relative; height: 14px; border-radius: 4px; background: var(--floor); border: 1px solid var(--line); overflow: hidden; }
+.meter .base, .meter .credit, .meter .spent { position: absolute; top: 0; bottom: 0; left: 0; }
+.meter .credit { background: repeating-linear-gradient(135deg, var(--coin-soft) 0 5px, transparent 5px 9px); border-right: 1px solid var(--coin); }
+.meter .spent { background: var(--fg); opacity: 0.78; }
+.meter .spent.over { background: var(--bad); opacity: 1; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; font-size: 13px; }
+.kv span:nth-child(even) { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.kv .total { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 600; }
+.big { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); }
+.chip { display: inline-block; font: 600 11.5px var(--body); letter-spacing: 0.03em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+.chip.ok { background: var(--accent-soft); color: var(--good); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.chip.idle { background: var(--floor); color: var(--muted); border: 1px solid var(--line); }
+.verdict { font-size: 13px; margin: 0; }
+#log { list-style: none; margin: 0; padding: 0; max-height: 330px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+#log li { display: grid; grid-template-columns: 44px 10px 1fr; gap: 6px; align-items: baseline; padding: 4px 6px; border-radius: 5px; cursor: pointer; }
+#log li:hover { background: var(--floor); }
+#log li.current { background: var(--accent-soft); }
+#log .t { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+#log .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transform: translateY(-1px); }
+#log .k-coin .dot, #log .k-collect .dot { background: var(--coin); }
+#log .k-trap .dot { background: var(--trap); }
+#log .k-plan .dot { background: var(--accent); }
+#log .k-skip .dot { background: var(--line); border: 1px solid var(--muted); }
+#log .k-end .dot { background: var(--good); }
+.empty { color: var(--muted); font-size: 13px; margin: 0; }
+.lower { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+@media (max-width: 900px) { .lower { grid-template-columns: minmax(0, 1fr); } }
+.rules { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; font-size: 13px; }
+.rules input[type=number] { width: 72px; text-align: right; font-family: var(--mono); }
+.rules select { width: 140px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+textarea { width: 100%; min-height: 90px; font-family: var(--mono); font-size: 11.5px; resize: vertical; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 4px 4px; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 500; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+tr.best td { font-weight: 600; color: var(--good); }
+.table-scroll { overflow-x: auto; }
+#toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg);
+  padding: 9px 14px; border-radius: 8px; font-size: 13px; max-width: min(92vw, 460px); box-shadow: 0 6px 24px rgba(0,0,0,0.25); z-index: 20; }
+kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--floor); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 0; border-top: 2px dashed var(--accent); vertical-align: middle; margin-right: 4px; }
+.legend i.trail { border-top: 3px solid var(--accent); opacity: 0.45; }
+.legend i.fog { width: 12px; height: 12px; border: 0; background: var(--fog); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Maze Ledger</h1>
+    <p>You are the maze. Spend points on walls and speed traps to slow the robot. Coins earn you more points, but only when the robot picks them up, and every coin it takes cuts its time.</p>
+    <div class="rule-line" id="ruleLine"></div>
+  </header>
+
+  <div class="layout">
+    <div class="board-col">
+      <div class="board-frame"><canvas id="board" aria-label="Maze board. Click or drag to place the selected item."></canvas></div>
+      <div class="controls">
+        <button class="primary" id="runBtn">Run robot</button>
+        <button id="backBtn" title="Step back (←)" aria-label="Step back">◀</button>
+        <button id="fwdBtn" title="Step forward (→)" aria-label="Step forward">▶</button>
+        <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Replay position">
+        <select id="speed" aria-label="Playback speed">
+          <option value="3">3 steps/s</option><option value="8" selected>8 steps/s</option>
+          <option value="20">20 steps/s</option><option value="60">60 steps/s</option>
+        </select>
+        <button id="editBtn">Back to editing</button>
+      </div>
+      <div class="controls">
+        <label><input type="checkbox" id="viewChk" checked> Robot's view (fog = unseen)</label>
+        <label><input type="checkbox" id="mathChk" checked> Coin math</label>
+      </div>
+      <div class="legend">
+        <span><i></i>planned route</span><span><i class="trail"></i>route walked</span><span><i class="fog"></i>not seen yet</span>
+        <span>Badge on a coin = detour the robot expects, in seconds</span>
+      </div>
+    </div>
+
+    <aside class="side">
+      <section class="card">
+        <h2>Build <small>keys <kbd>1</kbd>–<kbd>4</kbd></small></h2>
+        <div class="tools" id="tools"></div>
+        <p class="hint">Click or drag on the board. Click an item of the same kind to remove it. Shaded tiles near S and G do not accept traps.</p>
+      </section>
+
+      <section class="card">
+        <h2>Points <small id="pointsNote"></small></h2>
+        <div class="meter" aria-hidden="true"><div class="credit" id="mCredit"></div><div class="spent" id="mSpent"></div></div>
+        <div class="kv" id="budgetKv"></div>
+      </section>
+
+      <section class="card">
+        <h2>Escape clock <span class="chip idle" id="statusChip">Editing</span></h2>
+        <div class="big" id="bigTime">–</div>
+        <div class="kv" id="clockKv"></div>
+        <p class="verdict" id="verdict"></p>
+      </section>
+
+      <section class="card">
+        <h2>Robot's decisions <small id="logNote"></small></h2>
+        <ul id="log"></ul>
+        <p class="empty" id="logEmpty">Run the robot to see why it moves the way it does.</p>
+      </section>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="card">
+      <h2>Rules <small>change and test</small></h2>
+      <div class="rules" id="rulesForm"></div>
+      <div class="row"><button id="resetRules">Reset rules</button></div>
+    </section>
+    <section class="card">
+      <h2>Layouts</h2>
+      <div class="row">
+        <button id="eaBtn">EA champion (632 s)</button><button id="exampleBtn">Example</button><button id="randomBtn">Random</button><button id="clearBtn">Clear</button>
+      </div>
+      <div class="row"><button id="copyBtn">Copy layout + rules</button><button id="loadBtn">Load pasted layout</button></div>
+      <label for="layoutText" class="hint">Paste a copied layout here to load it. Copy a layout to share it in chat.</label>
+      <textarea id="layoutText" spellcheck="false"></textarea>
+    </section>
+    <section class="card">
+      <h2>Your runs <small>best valid in green</small></h2>
+      <div class="table-scroll"><table><thead><tr><th>#</th><th>Time</th><th>Walls</th><th>Traps</th><th>Coins</th><th>Budget</th></tr></thead><tbody id="hist"></tbody></table></div>
+      <p class="empty" id="histEmpty">No runs yet.</p>
+    </section>
+  </div>
+</div>
+<div id="toast" hidden></div>
+
+<script>
+const N = 21, NN = N * N, S = 0, G = NN - 1;
+const FLOOR = 0, WALL = 1, TRAP = 2, COIN = 3;
+const DEFAULT_RULES = { base: 120, wallCost: 1, trapCost: 3, trapDelay: 5, coinIncome: 4, coinBonus: 6, maxCoins: 6, safeRadius: 2, trapVis: "adjacent" };
+const RULE_FIELDS = [
+  ["base", "Starting points", 0, 500], ["wallCost", "Wall price (pt)", 0, 20], ["trapCost", "Trap price (pt)", 0, 50],
+  ["trapDelay", "Trap delay (s)", 0, 60], ["coinIncome", "Coin income (pt, if taken)", 0, 50], ["coinBonus", "Coin time bonus for robot (s)", 0, 60],
+  ["maxCoins", "Most coins allowed", 0, 40], ["safeRadius", "No-trap radius around S and G", 0, 10],
+];
+const TOOLS = [
+  { id: WALL, name: "Wall", cls: "wall", key: "1", price: r => `${r.wallCost} pt` },
+  { id: TRAP, name: "Speed trap", cls: "trap", key: "2", price: r => `${r.trapCost} pt · +${r.trapDelay} s` },
+  { id: COIN, name: "Coin", cls: "coin", key: "3", price: r => `+${r.coinIncome} pt if taken · −${r.coinBonus} s` },
+  { id: FLOOR, name: "Erase", cls: "erase", key: "4", price: () => "refunds points" },
+];
+
+let rules = { ...DEFAULT_RULES };
+let grid = new Uint8Array(NN);
+let tool = WALL;
+let run = null, frameIdx = 0, playing = false, history = [], hoverCell = -1;
+
+const $ = id => document.getElementById(id);
+const canvas = $("board"), ctx = canvas.getContext("2d");
+const rc = u => [Math.floor(u / N), u % N];
+const cellName = u => { const [r, c] = rc(u); return `row ${r + 1}, col ${c + 1}`; };
+function nbrs(u) { const [r, c] = rc(u), o = []; if (r > 0) o.push(u - N); if (r < N - 1) o.push(u + N); if (c > 0) o.push(u - 1); if (c < N - 1) o.push(u + 1); return o; }
+const inZone = u => { const [r, c] = rc(u); return r + c <= rules.safeRadius || (N - 1 - r) + (N - 1 - c) <= rules.safeRadius; };
+const count = t => grid.reduce((a, v) => a + (v === t), 0);
+const spent = () => count(WALL) * rules.wallCost + count(TRAP) * rules.trapCost;
+const capacity = coins => rules.base + rules.coinIncome * coins;
+
+// ------------------------------------------------------------------ path tools
+class Heap {
+  constructor() { this.a = []; this.seq = 0; }
+  get size() { return this.a.length; }
+  push(d, v) { const a = this.a; a.push([d, this.seq++, v]); let i = a.length - 1;
+    while (i > 0) { const p = (i - 1) >> 1; if (this.lt(a[i], a[p])) { [a[i], a[p]] = [a[p], a[i]]; i = p; } else break; } }
+  pop() { const a = this.a, top = a[0], last = a.pop(); if (a.length) { a[0] = last; let i = 0;
+      for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < a.length && this.lt(a[l], a[m])) m = l; if (r < a.length && this.lt(a[r], a[m])) m = r;
+        if (m === i) break; [a[i], a[m]] = [a[m], a[i]]; i = m; } } return top; }
+  lt(x, y) { return x[0] < y[0] || (x[0] === y[0] && x[1] < y[1]); }
+}
+// cost(v) = seconds to enter tile v (Infinity = blocked). reverse=true gives distance TO src.
+function dijkstra(src, cost, reverse = false) {
+  const dist = new Float64Array(NN).fill(Infinity), prev = new Int32Array(NN).fill(-1), h = new Heap();
+  dist[src] = 0; h.push(0, src);
+  while (h.size) { const [d, , u] = h.pop(); if (d > dist[u]) continue;
+    for (const v of nbrs(u)) { if (cost(v) === Infinity) continue;
+      const nd = d + (reverse ? cost(u) : cost(v)); if (nd < dist[v]) { dist[v] = nd; prev[v] = u; h.push(nd, v); } } }
+  return { dist, prev };
+}
+function pathTo(prev, src, dst) { const p = [dst]; while (p[p.length - 1] !== src) { const q = prev[p[p.length - 1]]; if (q < 0) return null; p.push(q); } return p.reverse(); }
+function pathExists() { const seen = new Uint8Array(NN), q = [S]; seen[S] = 1;
+  while (q.length) { const u = q.shift(); if (u === G) return true; for (const v of nbrs(u)) if (!seen[v] && grid[v] !== WALL) { seen[v] = 1; q.push(v); } } return false; }
+
+// ------------------------------------------------------------------ robot
+function simulate() {
+  const known = new Int8Array(NN).fill(-1);                 // -1 unseen (assumed open), else FLOOR/WALL/TRAP
+  const coins = new Set(); grid.forEach((t, i) => { if (t === COIN) coins.add(i); });
+  const frames = [], log = [];
+  let pos = S, steps = 0, trapTime = 0, collected = 0, target = G, path = [S], verdicts = new Map();
+  const cost = v => known[v] === WALL ? Infinity : known[v] === TRAP ? 1 + rules.trapDelay : 1;
+  const say = (kind, text, cell = -1) => log.push({ kind, text, cell, frame: frames.length, t: steps + trapTime });
+
+  function sense(p) {
+    const newly = [];
+    for (const v of [p, ...nbrs(p)]) { if (known[v] !== -1) continue;
+      known[v] = grid[v] === WALL ? WALL : (grid[v] === TRAP && rules.trapVis === "adjacent") ? TRAP : FLOOR; newly.push(v); }
+    return newly;
+  }
+  function decide(blockers) {
+    const fwd = dijkstra(pos, cost), back = dijkstra(G, cost, true);
+    const base = fwd.dist[G];
+    const evals = [];
+    let best = G, bestD = Infinity;
+    for (const c of coins) {
+      const det = fwd.dist[c] + back.dist[c] - base;
+      const ok = det < rules.coinBonus;
+      evals.push({ c, det, ok });
+      if (ok && (det < bestD || (det === bestD && fwd.dist[c] < fwd.dist[best]))) { best = c; bestD = det; }
+      const was = verdicts.get(c);
+      if (was === undefined && !ok) say("skip", `Skips the coin at ${cellName(c)}: detour looks like ${fmt(det)} s, not less than the ${rules.coinBonus} s bonus.`, c);
+      verdicts.set(c, ok);
+    }
+    if (blockers.length) {
+      const b = blockers[0], what = known[b] === TRAP ? `a trap (+${rules.trapDelay} s)` : "a wall";
+      say("plan", `Sees ${what} at ${cellName(b)} on its planned route, so it replans.`, b);
+    }
+    if (best !== target) {
+      if (best !== G) say("coin", `Heads for the coin at ${cellName(best)}: detour looks like ${fmt(bestD)} s, less than the ${rules.coinBonus} s bonus.`, best);
+      else if (coins.has(target)) say("skip", `Gives up the coin at ${cellName(target)}: with what it knows now, the detour is ${fmt(evals.find(e => e.c === target).det)} s.`, target);
+      else if (steps > 0) say("plan", `Heads for the goal.`, G);
+      target = best;
+    }
+    path = pathTo(fwd.prev, pos, target) || [pos];
+    return evals;
+  }
+  const snap = evals => frames.push({ pos, steps, trapTime, collected, known: known.slice(), path: path.slice(), target, evals, coinsLeft: [...coins] });
+
+  sense(pos);
+  say("plan", `Starts at S. It can see all ${coins.size} coin(s) and assumes every unseen tile is open.`, S);
+  snap(decide([]));
+  if (target === G) say("plan", `Plans the shortest route to the goal on its map: ${fmt(dijkstra(pos, cost).dist[G])} s.`, G);
+  while (pos !== G && steps < 5000) {
+    pos = path[1]; steps++;
+    if (grid[pos] === TRAP) { trapTime += rules.trapDelay; known[pos] = TRAP;
+      say("trap", `Steps on a trap at ${cellName(pos)}: stuck for ${rules.trapDelay} s${rules.trapVis === "hidden" ? " (it could not see it)" : ""}.`, pos); }
+    if (coins.has(pos)) { coins.delete(pos); collected++;
+      say("collect", `Takes the coin at ${cellName(pos)}: −${rules.coinBonus} s for the robot, +${rules.coinIncome} pt for the maze.`, pos); }
+    const onRoute = new Set(path.slice(1));
+    const newly = sense(pos).filter(v => (known[v] === WALL || known[v] === TRAP) && onRoute.has(v));
+    if (pos === G) { say("end", `Escapes after ${steps} steps.`, G); snap([]); break; }
+    snap(decide(newly));
+  }
+  if (pos !== G) say("end", `Stops after ${steps} steps without reaching G.`, pos);
+  log.forEach(e => { e.frame = Math.min(e.frame, frames.length - 1); });
+  frames.forEach((f, i) => { f.logEnd = log.filter(e => e.frame <= i).length; });
+  const sp = spent(), cap = capacity(collected);
+  return { frames, log, steps, trapTime, collected, coinsPlaced: count(COIN), escape: steps + trapTime - rules.coinBonus * collected, spent: sp, cap, over: sp - cap };
+}
+const fmt = x => Number.isFinite(x) ? String(Math.round(x * 10) / 10) : "∞";
+
+// ------------------------------------------------------------------ editing
+function place(u, t, quiet) {
+  if (u === S || u === G) return false;
+  const old = grid[u]; if (old === t) return false;
+  if (t === TRAP && inZone(u)) { if (!quiet) toast(`Traps cannot go within ${rules.safeRadius} tiles of S or G.`); return false; }
+  const coins = count(COIN) - (old === COIN) + (t === COIN);
+  if (t === COIN && coins > rules.maxCoins) { if (!quiet) toast(`You can place at most ${rules.maxCoins} coins.`); return false; }
+  const price = x => x === WALL ? rules.wallCost : x === TRAP ? rules.trapCost : 0;
+  const newSpent = spent() - price(old) + price(t);
+  if (t !== FLOOR && price(t) > price(old) && newSpent > capacity(coins)) {
+    if (!quiet) toast(`Not enough points: this needs ${newSpent - capacity(coins)} more. Place a coin to borrow ${rules.coinIncome}.`); return false; }
+  grid[u] = t; return true;
+}
+let paintMode = null, lastPainted = -1;
+function cellAt(e) { const r = canvas.getBoundingClientRect(); const x = Math.floor((e.clientX - r.left) / r.width * N), y = Math.floor((e.clientY - r.top) / r.height * N);
+  return x < 0 || y < 0 || x >= N || y >= N ? -1 : y * N + x; }
+canvas.addEventListener("pointerdown", e => {
+  const u = cellAt(e); if (u < 0) return;
+  if (run) leaveRun();
+  paintMode = grid[u] === tool && tool !== FLOOR ? FLOOR : tool;
+  canvas.setPointerCapture(e.pointerId); lastPainted = u;
+  if (place(u, paintMode, false)) changed();
+});
+canvas.addEventListener("pointermove", e => {
+  const u = cellAt(e);
+  if (paintMode === null) { if (u !== hoverCell) { hoverCell = u; draw(); } return; }
+  if (u < 0 || u === lastPainted) return; lastPainted = u;
+  if (place(u, paintMode, true)) changed();
+});
+const endPaint = () => { paintMode = null; lastPainted = -1; };
+canvas.addEventListener("pointerup", endPaint); canvas.addEventListener("pointercancel", endPaint);
+canvas.addEventListener("pointerleave", () => { if (paintMode === null) { hoverCell = -1; draw(); } });
+
+function changed() { save(); renderAll(); }
+
+// ------------------------------------------------------------------ run & playback
+function startRun() {
+  const why = runBlocker(); if (why) { toast(why); return; }
+  run = simulate(); frameIdx = 0; playing = true;
+  history.push({ escape: run.escape, over: run.over, walls: count(WALL), traps: count(TRAP), coins: `${run.collected}/${run.coinsPlaced}` });
+  renderAll(); tick.last = performance.now(); requestAnimationFrame(tick);
+}
+function runBlocker() {
+  if (!pathExists()) return "The robot has no way to reach G. Remove a wall.";
+  if (count(COIN) > rules.maxCoins) return `Too many coins: the limit is ${rules.maxCoins}.`;
+  if (grid.some((t, i) => t === TRAP && inZone(i))) return `A trap sits within ${rules.safeRadius} tiles of S or G. Move it.`;
+  if (spent() > capacity(count(COIN))) return `Over budget even if the robot takes every coin. Remove ${spent() - capacity(count(COIN))} pt of items.`;
+  return "";
+}
+function leaveRun() { run = null; playing = false; frameIdx = 0; renderAll(); }
+function tick(now) {
+  if (!playing || !run) return;
+  const sps = +$("speed").value, dt = now - tick.last;
+  if (dt >= 1000 / sps) { tick.last = now; if (frameIdx < run.frames.length - 1) { frameIdx++; renderRun(); } else { playing = false; renderRun(); return; } }
+  requestAnimationFrame(tick);
+}
+function seek(i) { if (!run) return; playing = false; frameIdx = Math.max(0, Math.min(run.frames.length - 1, i)); renderRun(); }
+
+// ------------------------------------------------------------------ drawing
+function tokens() { const s = getComputedStyle(document.documentElement); const g = n => s.getPropertyValue(n).trim();
+  return { floor: g("--floor"), grid: g("--gridline"), wall: g("--wall"), fog: g("--fog"), accent: g("--accent"), trap: g("--trap"), trapSoft: g("--trap-soft"),
+    coin: g("--coin"), coinSoft: g("--coin-soft"), good: g("--good"), muted: g("--muted"), fg: g("--fg"), panel: g("--panel"), zone: g("--zone"), mono: g("--mono") }; }
+function resize() { const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth; canvas.width = Math.round(w * dpr); canvas.height = Math.round(w * dpr); draw(); }
+function draw() {
+  const T = tokens(), dpr = window.devicePixelRatio || 1, W = canvas.clientWidth, cs = W / N;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, W);
+  ctx.fillStyle = T.floor; ctx.fillRect(0, 0, W, W);
+  const f = run ? run.frames[frameIdx] : null, coinsLeft = f ? new Set(f.coinsLeft) : null;
+  const X = u => (u % N) * cs, Y = u => Math.floor(u / N) * cs, CX = u => X(u) + cs / 2, CY = u => Y(u) + cs / 2;
+  // grid lines
+  ctx.strokeStyle = T.grid; ctx.lineWidth = 1; ctx.beginPath();
+  for (let i = 1; i < N; i++) { ctx.moveTo(i * cs, 0); ctx.lineTo(i * cs, W); ctx.moveTo(0, i * cs); ctx.lineTo(W, i * cs); } ctx.stroke();
+  for (let u = 0; u < NN; u++) {
+    const t = grid[u];
+    if (!run && t === FLOOR && rules.safeRadius > 0 && inZone(u) && u !== S && u !== G) { ctx.fillStyle = T.zone; ctx.fillRect(X(u), Y(u), cs, cs); }
+    if (t === WALL) { ctx.fillStyle = T.wall; ctx.fillRect(X(u) + 0.5, Y(u) + 0.5, cs - 1, cs - 1); }
+    else if (t === TRAP) { drawTrap(X(u), Y(u), cs, T, f && f.known[u] === FLOOR); }
+    else if (t === COIN && (!coinsLeft || coinsLeft.has(u))) { drawCoin(CX(u), CY(u), cs, T); }
+    else if (t === COIN) { ctx.setLineDash([2, 2]); ctx.strokeStyle = T.coin; ctx.beginPath(); ctx.arc(CX(u), CY(u), cs * 0.28, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+    if (f && $("viewChk").checked && f.known[u] === -1) { ctx.fillStyle = T.fog; ctx.fillRect(X(u), Y(u), cs, cs); }
+  }
+  // labels
+  ctx.font = `700 ${Math.max(10, cs * 0.5)}px ${getComputedStyle(document.body).fontFamily}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillStyle = T.fg; ctx.fillText("S", CX(S), CY(S)); ctx.fillText("G", CX(G), CY(G));
+  if (f) {
+    // trail
+    ctx.strokeStyle = T.accent; ctx.globalAlpha = 0.4; ctx.lineWidth = Math.max(2, cs * 0.18); ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.beginPath();
+    for (let i = 0; i <= frameIdx; i++) { const p = run.frames[i].pos; i ? ctx.lineTo(CX(p), CY(p)) : ctx.moveTo(CX(p), CY(p)); } ctx.stroke(); ctx.globalAlpha = 1;
+    // planned route
+    if (f.path.length > 1) { ctx.setLineDash([cs * 0.25, cs * 0.2]); ctx.lineWidth = 2; ctx.beginPath();
+      f.path.forEach((p, i) => i ? ctx.lineTo(CX(p), CY(p)) : ctx.moveTo(CX(p), CY(p))); ctx.stroke(); ctx.setLineDash([]); }
+    // target ring
+    if (f.target !== G || f.pos !== G) { ctx.lineWidth = 2; ctx.strokeStyle = f.target === G ? T.accent : T.coin; ctx.beginPath(); ctx.arc(CX(f.target), CY(f.target), cs * 0.48, 0, 7); ctx.stroke(); }
+    // coin math
+    if ($("mathChk").checked) for (const e of f.evals) badge(CX(e.c), Y(e.c), `${fmt(e.det)}s${e.ok ? " ✓" : ""}`, e.ok ? T.good : T.muted, T, cs, W);
+    // robot
+    ctx.fillStyle = T.accent; ctx.beginPath(); ctx.arc(CX(f.pos), CY(f.pos), cs * 0.34, 0, 7); ctx.fill();
+    ctx.fillStyle = T.panel; ctx.beginPath(); ctx.arc(CX(f.pos), CY(f.pos), cs * 0.12, 0, 7); ctx.fill();
+  }
+  if (hoverCell >= 0) { ctx.strokeStyle = T.fg; ctx.lineWidth = 2; ctx.strokeRect(X(hoverCell) + 1, Y(hoverCell) + 1, cs - 2, cs - 2); }
+}
+function drawTrap(x, y, cs, T, unnoticed) {
+  ctx.fillStyle = T.trapSoft; ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
+  ctx.strokeStyle = T.trap; ctx.lineWidth = Math.max(1.5, cs * 0.08); ctx.beginPath();
+  const n = 3, w = (cs - 6) / n; ctx.moveTo(x + 3, y + cs * 0.68);
+  for (let i = 0; i < n; i++) { ctx.lineTo(x + 3 + w * (i + 0.5), y + cs * 0.32); ctx.lineTo(x + 3 + w * (i + 1), y + cs * 0.68); } ctx.stroke();
+  if (unnoticed) { ctx.setLineDash([2, 2]); ctx.strokeRect(x + 1.5, y + 1.5, cs - 3, cs - 3); ctx.setLineDash([]); }
+}
+function drawCoin(cx, cy, cs, T) {
+  ctx.fillStyle = T.coin; ctx.beginPath(); ctx.arc(cx, cy, cs * 0.32, 0, 7); ctx.fill();
+  ctx.strokeStyle = T.coinSoft; ctx.lineWidth = Math.max(1, cs * 0.07); ctx.beginPath(); ctx.arc(cx, cy, cs * 0.19, 0, 7); ctx.stroke();
+}
+function badge(cx, top, text, color, T, cs, W) {
+  ctx.font = `500 ${Math.max(9, cs * 0.42)}px ${T.mono}`; const w = ctx.measureText(text).width + 8, h = Math.max(13, cs * 0.6);
+  let x = Math.min(Math.max(cx - w / 2, 1), W - w - 1), y = top - h - 1; if (y < 1) y = top + cs + 1;
+  ctx.fillStyle = T.panel; ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(x, y, w, h, 3); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = color; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(text, x + 4, y + h / 2 + 0.5);
+}
+
+// ------------------------------------------------------------------ panels
+function renderAll() { renderRules(); renderTools(); renderBudget(); renderRun(); renderHistory(); }
+function renderTools() {
+  $("tools").innerHTML = TOOLS.map(t => `<button class="tool" data-t="${t.id}" aria-pressed="${t.id === tool}"><span class="sw ${t.cls}"></span><span class="nm">${t.name} <kbd>${t.key}</kbd></span><span class="pr">${t.price(rules)}</span></button>`).join("");
+}
+$("tools").addEventListener("click", e => { const b = e.target.closest(".tool"); if (b) { tool = +b.dataset.t; renderTools(); } });
+function renderBudget() {
+  const coins = count(COIN), sp = spent(), cap = capacity(coins), collected = run ? run.collected : null;
+  const earnedCap = run ? capacity(collected) : cap, scale = Math.max(cap, sp, 1);
+  $("mCredit").style.width = `${cap / scale * 100}%`;
+  const m = $("mSpent"); m.style.width = `${sp / scale * 100}%`; m.classList.toggle("over", sp > earnedCap);
+  $("pointsNote").textContent = run ? "after the run" : "before the run";
+  const rows = [["Starting points", rules.base],
+    [`Coin credit (${coins} × ${rules.coinIncome}, only if taken)`, `+${rules.coinIncome * coins}`],
+    [`Walls (${count(WALL)} × ${rules.wallCost})`, `−${count(WALL) * rules.wallCost}`], [`Traps (${count(TRAP)} × ${rules.trapCost})`, `−${count(TRAP) * rules.trapCost}`]];
+  let html = rows.map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  if (run) html += `<span class="total">Left after the run (${collected} of ${coins} coins taken)</span><span class="total" style="color:var(${run.over > 0 ? "--bad" : "--good"})">${earnedCap - sp}</span>`;
+  else html += `<span class="total">Left if the robot takes every coin</span><span class="total">${cap - sp}</span>`;
+  $("budgetKv").innerHTML = html;
+}
+function renderRun() {
+  const chip = $("statusChip"), why = runBlocker();
+  $("runBtn").textContent = run ? (playing ? "Pause" : frameIdx >= run.frames.length - 1 ? "Run again" : "Play") : "Run robot";
+  $("runBtn").disabled = !run && !!why;
+  $("runBtn").title = !run && why ? why : "";
+  for (const id of ["backBtn", "fwdBtn", "scrub", "editBtn"]) $(id).disabled = !run;
+  if (!run) {
+    chip.className = "chip " + (why ? "bad" : "idle"); chip.textContent = why ? "Not ready" : "Editing";
+    $("bigTime").innerHTML = "–"; $("clockKv").innerHTML = "";
+    $("verdict").textContent = why || "Press Run robot. The robot does not know your maze. It only sees the tiles next to it, plus every coin.";
+    $("log").innerHTML = ""; $("logEmpty").hidden = false; $("logNote").textContent = ""; $("scrub").max = 0; $("scrub").value = 0;
+    draw(); return;
+  }
+  const f = run.frames[frameIdx], done = frameIdx === run.frames.length - 1;
+  $("scrub").max = run.frames.length - 1; $("scrub").value = frameIdx;
+  const bonus = rules.coinBonus * f.collected, now = f.steps + f.trapTime - bonus;
+  $("bigTime").innerHTML = `${now}<small> s ${done ? "escape time" : "so far"}</small>`;
+  $("clockKv").innerHTML = `<span>Steps (1 s each)</span><span>${f.steps}</span><span>Stuck in traps</span><span>+${f.trapTime}</span>` +
+    `<span>Coin bonus (${f.collected} × ${rules.coinBonus})</span><span>−${bonus}</span>`;
+  if (done) {
+    const ok = run.over <= 0; chip.className = "chip " + (ok ? "ok" : "bad"); chip.textContent = ok ? "Valid maze" : "Over budget";
+    $("verdict").innerHTML = ok ? `The robot took ${run.collected} of ${run.coinsPlaced} coins, so your design fits the budget. Score: <b>${run.escape} s</b>.`
+      : `The robot took only ${run.collected} of ${run.coinsPlaced} coins. You spent ${run.spent} pt but earned a budget of ${run.cap} pt, so you are ${run.over} pt over. In the EA this maze gets a penalty.`;
+  } else { chip.className = "chip idle"; chip.textContent = playing ? "Running" : "Paused"; $("verdict").textContent = `Step ${f.steps} of ${run.steps}.`; }
+  // log
+  const shown = run.log.slice(0, f.logEnd);
+  $("logEmpty").hidden = true; $("logNote").textContent = `${shown.length} of ${run.log.length}`;
+  const ul = $("log");
+  ul.innerHTML = shown.map((e, i) => `<li class="k-${e.kind}${e.frame === frameIdx ? " current" : ""}" data-i="${i}"><span class="t">${e.t}s</span><span class="dot"></span><span>${e.text}</span></li>`).join("");
+  ul.scrollTop = ul.scrollHeight;
+  draw();
+}
+$("log").addEventListener("click", e => { const li = e.target.closest("li"); if (li) seek(run.log[+li.dataset.i].frame); });
+$("log").addEventListener("mouseover", e => { const li = e.target.closest("li"); const c = li ? run.log[+li.dataset.i].cell : -1; if (c !== hoverCell) { hoverCell = c; draw(); } });
+$("log").addEventListener("mouseleave", () => { hoverCell = -1; draw(); });
+function renderHistory() {
+  const valid = history.filter(h => h.over <= 0), best = valid.length ? Math.max(...valid.map(h => h.escape)) : null;
+  $("hist").innerHTML = history.map((h, i) => `<tr class="${h.over <= 0 && h.escape === best ? "best" : ""}"><td>${i + 1}</td><td>${h.escape} s</td><td>${h.walls}</td><td>${h.traps}</td><td>${h.coins}</td><td>${h.over <= 0 ? "ok" : `+${h.over} over`}</td></tr>`).reverse().join("");
+  $("histEmpty").hidden = history.length > 0;
+}
+function renderRules() {
+  const form = $("rulesForm");
+  if (!form.childElementCount) {
+    form.innerHTML = RULE_FIELDS.map(([k, label, mn, mx]) => `<label for="r_${k}">${label}</label><input type="number" id="r_${k}" data-k="${k}" min="${mn}" max="${mx}" step="1">`).join("") +
+      `<label for="r_trapVis">Robot sees traps</label><select id="r_trapVis" data-k="trapVis"><option value="adjacent">when next to them</option><option value="hidden">only by stepping on them</option></select>`;
+    form.addEventListener("change", e => { const k = e.target.dataset.k; if (!k) return;
+      rules[k] = k === "trapVis" ? e.target.value : Math.max(0, Math.round(+e.target.value || 0)); if (run) leaveRun(); changed(); });
+  }
+  for (const [k] of RULE_FIELDS) $(`r_${k}`).value = rules[k];
+  $("r_trapVis").value = rules.trapVis;
+  const r = rules;
+  $("ruleLine").innerHTML = `<span><b>${r.base}</b> pt to start</span><span>wall <b>${r.wallCost}</b> pt</span><span>trap <b>${r.trapCost}</b> pt = +<b>${r.trapDelay}</b> s</span>` +
+    `<span>coin +<b>${r.coinIncome}</b> pt if taken, −<b>${r.coinBonus}</b> s for robot</span><span>≤ <b>${r.maxCoins}</b> coins</span><span>traps ${r.trapVis === "adjacent" ? "visible when adjacent" : "hidden"}</span>`;
+}
+
+// ------------------------------------------------------------------ layouts
+const CH = { [FLOOR]: ".", [WALL]: "#", [TRAP]: "T", [COIN]: "$" };
+function layoutText() {
+  const rows = []; for (let r = 0; r < N; r++) { let s = ""; for (let c = 0; c < N; c++) { const u = r * N + c; s += u === S ? "S" : u === G ? "G" : CH[grid[u]]; } rows.push(s); }
+  const r = rules;
+  return `rules base=${r.base} wall=${r.wallCost} trap=${r.trapCost} delay=${r.trapDelay} income=${r.coinIncome} bonus=${r.coinBonus} maxCoins=${r.maxCoins} safe=${r.safeRadius} traps=${r.trapVis}\n` +
+    (run ? `result escape=${run.escape}s steps=${run.steps} trapTime=${run.trapTime} coins=${run.collected}/${run.coinsPlaced} spent=${run.spent} budget=${run.cap}\n` : "") + rows.join("\n");
+}
+function loadText(txt) {
+  const lines = txt.split(/\r?\n/).map(l => l.trim());
+  const rl = lines.find(l => l.startsWith("rules"));
+  const map = { base: "base", wall: "wallCost", trap: "trapCost", delay: "trapDelay", income: "coinIncome", bonus: "coinBonus", maxCoins: "maxCoins", safe: "safeRadius", traps: "trapVis" };
+  const next = { ...rules };
+  if (rl) for (const kv of rl.split(/\s+/).slice(1)) { const [k, v] = kv.split("="); if (map[k]) next[map[k]] = k === "traps" ? (v === "hidden" ? "hidden" : "adjacent") : Math.max(0, +v || 0); }
+  const rows = lines.map(l => l.replace(/\s/g, "")).filter(l => l.length === N && /^[.#T$SG]+$/.test(l));
+  if (rows.length !== N) { toast(`Could not read the layout: it needs ${N} rows of ${N} characters (. # T $ S G).`); return; }
+  const g = new Uint8Array(NN);
+  rows.forEach((row, r) => [...row].forEach((ch, c) => { g[r * N + c] = ch === "#" ? WALL : ch === "T" ? TRAP : ch === "$" ? COIN : FLOOR; }));
+  rules = next; grid = g; if (run) leaveRun(); changed(); toast("Layout loaded.");
+}
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function randomLayout(rand) {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    grid = new Uint8Array(NN);
+    const cells = [...Array(NN).keys()].filter(u => u !== S && u !== G).sort(() => rand() - 0.5);
+    let i = 0;
+    const coins = Math.min(3, rules.maxCoins);
+    for (let k = 0; k < coins; k++) grid[cells[i++]] = COIN;
+    let traps = 4; for (const u of cells.slice(i)) { if (traps && !inZone(u) && grid[u] === FLOOR) { grid[u] = TRAP; traps--; } }
+    const target = Math.floor((rules.base - count(TRAP) * rules.trapCost) / Math.max(rules.wallCost, 1) * 0.85);
+    for (const u of cells) { if (count(WALL) >= target) break; if (grid[u] === FLOOR && rand() < 0.5) { grid[u] = WALL; if (!pathExists()) grid[u] = FLOOR; } }
+    if (pathExists()) return;
+  }
+}
+const EA_CHAMPION = `rules base=120 wall=1 trap=3 delay=5 income=4 bonus=6 maxCoins=6 safe=2 traps=adjacent
+S.....#..............
+.....#...............
+......#..........#.$.
+.......#.##.....#..#T
+..#...##.T.#..$#..#..
+...#....##T.##..##.#.
+....#......#..#...#.T
+...#.....##$...#...#.
+...#.....#.#....#..#.
+.##..#..#.T.T#.T.#..#
+...#..##..$#..#.#....
+....#T..#.T.##...#...
+...#..#.$#.#..#..#...
+....#.#.#...#T.##....
+.....#.#...T.T#.#....
+......T...#.##..T#...
+.$...#.#...#....#....
+...##.#..##......#...
+..#...#.#.......#....
+.#...#..#.......#....
+....#....T#.....T#..G`;
+$("eaBtn").onclick = () => loadText(EA_CHAMPION);
+$("exampleBtn").onclick = () => { if (run) leaveRun(); randomLayout(rng(455)); changed(); };
+$("randomBtn").onclick = () => { if (run) leaveRun(); randomLayout(Math.random); changed(); };
+$("clearBtn").onclick = () => { if (run) leaveRun(); grid = new Uint8Array(NN); changed(); };
+$("resetRules").onclick = () => { rules = { ...DEFAULT_RULES }; if (run) leaveRun(); changed(); };
+$("copyBtn").onclick = () => { const t = layoutText(); $("layoutText").value = t;
+  navigator.clipboard.writeText(t).then(() => toast("Copied. Paste it in chat to share this design."), () => { $("layoutText").select(); toast("Copy blocked: the text is selected below, so press Ctrl+C."); }); };
+$("loadBtn").onclick = () => loadText($("layoutText").value);
+
+// ------------------------------------------------------------------ controls
+$("runBtn").onclick = () => {
+  if (!run) return startRun();
+  if (frameIdx >= run.frames.length - 1) { frameIdx = 0; }
+  playing = !playing; renderRun(); if (playing) { tick.last = performance.now(); requestAnimationFrame(tick); }
+};
+$("backBtn").onclick = () => seek(frameIdx - 1);
+$("fwdBtn").onclick = () => seek(frameIdx + 1);
+$("scrub").oninput = e => seek(+e.target.value);
+$("editBtn").onclick = leaveRun;
+$("viewChk").onchange = draw; $("mathChk").onchange = draw;
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea, select")) return;
+  const t = TOOLS.find(t => t.key === e.key); if (t) { tool = t.id; renderTools(); return; }
+  if (e.key === " ") { e.preventDefault(); $("runBtn").click(); }
+  if (e.key === "ArrowRight" && run) seek(frameIdx + 1);
+  if (e.key === "ArrowLeft" && run) seek(frameIdx - 1);
+  if (e.key === "Escape" && run) leaveRun();
+});
+let toastTimer; function toast(msg) { const el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3200); }
+
+// ------------------------------------------------------------------ persistence
+function save() { try { localStorage.setItem("maze-ledger", JSON.stringify({ grid: [...grid], rules })); } catch (e) {} }
+function start(data) {
+  let d = data && data.grid ? data : null;
+  if (!d) { try { d = JSON.parse(localStorage.getItem("maze-ledger") || "null"); } catch (e) { d = null; } }
+  if (d && d.grid && d.grid.length === NN) { grid = Uint8Array.from(d.grid); rules = { ...DEFAULT_RULES, ...d.rules }; if (d.history) history = d.history; }
+  else randomLayout(rng(455));
+  renderAll(); resize();
+}
+window.claude?.hot?.snapshot?.(() => ({ grid: [...grid], rules, history }));
+new ResizeObserver(resize).observe(canvas);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
