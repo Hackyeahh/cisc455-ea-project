@@ -1,17 +1,17 @@
-# Maze Ledger EA
+# Maze Designer EA
 
-A Rust EA for the **Maze Ledger** points game. The maze spends points on walls
+A Rust EA for the **Maze Designer** points game. The maze spends points on walls
 and speed traps to slow an exploring robot. Coins give the maze more points, but
 only when the robot picks them up, and each coin cuts the robot's time.
 
-The robot is a step-for-step port of `simulate()` in the Maze Ledger web page, so
+The robot is a step-for-step port of `simulate()` in the Maze Designer web page, so
 a layout gets the same score here and in the browser. The page is
-`maze-ledger.html` in this folder: open it in a browser to play.
+`maze-designer.html` in this folder: open it in a browser to play.
 
 ```
 cargo build --release
-target/release/ledger_ea evolve 10 900 out/ea_best.txt             # threads, seconds, output
-target/release/ledger_ea eval layout.txt                            # score layouts (page text format)
+target/release/maze_designer evolve 10 900 out/ea_best.txt         # threads, seconds, output
+target/release/maze_designer eval layout.txt                        # score layouts (page text format)
 ```
 
 Standard library only, no crates.
@@ -188,7 +188,7 @@ vs. 0.3) would test whether it matters as much as the argument above says.
 
 ## Verification
 
-- **Parity with the page [measured]:** 116 random layouts (0–5 coins taken, a quarter with hidden traps), scored by the page's JavaScript in Node and by `ledger_ea eval`. All 116 results are identical.
+- **Parity with the page [measured]:** 116 random layouts (0–5 coins taken, a quarter with hidden traps), scored by the page's JavaScript in Node and by `maze_designer eval`. All 116 results are identical.
 - The page also scores the champion at 632 s.
 - `eval` accepts files with Windows (CRLF) line endings.
 

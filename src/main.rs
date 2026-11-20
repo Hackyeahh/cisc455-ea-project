@@ -1,10 +1,10 @@
-//! Maze Ledger EA: evolve a maze for the points game in the Maze Ledger page.
+//! Maze Designer EA: evolve a maze for the points game in the Maze Designer page.
 //!
 //! The robot is a step-for-step port of `simulate()` in the page, so a layout scores
 //! the same here and in the browser.
 //!
-//!   ledger_ea eval <layout.txt>                      score one layout
-//!   ledger_ea evolve [threads] [seconds] [out.txt]   island GA, one island per thread
+//!   maze_designer eval <layout.txt>                      score one layout
+//!   maze_designer evolve [threads] [seconds] [out.txt]   island GA, one island per thread
 //!
 //! Genotype: 21x21 grid over {floor, wall, trap, coin}. Fitness: robot escape time
 //! (steps + trap seconds - bonus x coins taken). Infeasible mazes rank below every
@@ -393,6 +393,6 @@ fn main() {
             std::fs::write(&out, &txt).expect("write");
             println!("\n{txt}");
         }
-        _ => eprintln!("usage: ledger_ea eval <layout.txt> | ledger_ea evolve [threads] [seconds] [out.txt]"),
+        _ => eprintln!("usage: maze_designer eval <layout.txt> | maze_designer evolve [threads] [seconds] [out.txt]"),
     }
 }
