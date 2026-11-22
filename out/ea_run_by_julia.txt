@@ -1,0 +1,467 @@
+
+First run:
+
+[  10s] evals    15000  best escape  253s  (steps 248 traps +35 coins 5/6 spent 139/140)
+[  20s] evals    30000  best escape  316s  (steps 296 traps +50 coins 5/5 spent 139/140)
+[  30s] evals    45000  best escape  373s  (steps 334 traps +75 coins 6/6 spent 144/144)
+[  40s] evals    63000  best escape  403s  (steps 364 traps +75 coins 6/6 spent 142/144)
+[  50s] evals    82500  best escape  422s  (steps 362 traps +90 coins 5/5 spent 140/140)
+[  60s] evals    97500  best escape  431s  (steps 386 traps +75 coins 5/5 spent 139/140)
+[  70s] evals   112500  best escape  445s  (steps 376 traps +105 coins 6/6 spent 144/144)
+[  80s] evals   129000  best escape  457s  (steps 398 traps +95 coins 6/6 spent 143/144)
+[  90s] evals   144000  best escape  473s  (steps 404 traps +105 coins 6/6 spent 142/144)
+[ 100s] evals   159000  best escape  483s  (steps 414 traps +105 coins 6/6 spent 144/144)
+[ 110s] evals   172500  best escape  486s  (steps 422 traps +100 coins 6/6 spent 144/144)
+[ 120s] evals   186000  best escape  499s  (steps 430 traps +105 coins 6/6 spent 144/144)
+[ 130s] evals   202500  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 140s] evals   213000  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 150s] evals   228000  best escape  511s  (steps 432 traps +115 coins 6/6 spent 144/144)
+[ 160s] evals   243000  best escape  517s  (steps 428 traps +125 coins 6/6 spent 144/144)
+[ 170s] evals   258000  best escape  517s  (steps 428 traps +125 coins 6/6 spent 144/144)
+[ 180s] evals   274500  best escape  521s  (steps 432 traps +125 coins 6/6 spent 144/144)
+[ 190s] evals   289500  best escape  527s  (steps 438 traps +125 coins 6/6 spent 144/144)
+[ 200s] evals   309000  best escape  529s  (steps 440 traps +125 coins 6/6 spent 144/144)
+[ 210s] evals   324000  best escape  535s  (steps 436 traps +135 coins 6/6 spent 144/144)
+[ 220s] evals   339000  best escape  539s  (steps 440 traps +135 coins 6/6 spent 144/144)
+[ 230s] evals   354000  best escape  541s  (steps 442 traps +135 coins 6/6 spent 144/144)
+[ 240s] evals   370500  best escape  541s  (steps 442 traps +135 coins 6/6 spent 144/144)
+[ 250s] evals   385500  best escape  542s  (steps 458 traps +120 coins 6/6 spent 144/144)
+[ 260s] evals   400500  best escape  545s  (steps 446 traps +135 coins 6/6 spent 144/144)
+[ 270s] evals   415500  best escape  549s  (steps 450 traps +135 coins 6/6 spent 144/144)
+[ 280s] evals   430500  best escape  552s  (steps 458 traps +130 coins 6/6 spent 144/144)
+[ 290s] evals   444000  best escape  555s  (steps 456 traps +135 coins 6/6 spent 143/144)
+[ 300s] evals   459000  best escape  559s  (steps 460 traps +135 coins 6/6 spent 144/144)
+[ 310s] evals   474000  best escape  559s  (steps 460 traps +135 coins 6/6 spent 144/144)
+[ 320s] evals   489000  best escape  562s  (steps 458 traps +140 coins 6/6 spent 144/144)
+[ 330s] evals   502500  best escape  564s  (steps 460 traps +140 coins 6/6 spent 143/144)
+[ 340s] evals   517500  best escape  564s  (steps 460 traps +140 coins 6/6 spent 143/144)
+[ 350s] evals   532500  best escape  568s  (steps 464 traps +140 coins 6/6 spent 144/144)
+[ 360s] evals   546000  best escape  568s  (steps 464 traps +140 coins 6/6 spent 144/144)
+[ 370s] evals   559500  best escape  568s  (steps 464 traps +140 coins 6/6 spent 144/144)
+[ 380s] evals   574500  best escape  573s  (steps 454 traps +155 coins 6/6 spent 144/144)
+[ 390s] evals   589500  best escape  573s  (steps 454 traps +155 coins 6/6 spent 144/144)
+[ 400s] evals   604500  best escape  573s  (steps 454 traps +155 coins 6/6 spent 144/144)
+[ 410s] evals   616500  best escape  574s  (steps 470 traps +140 coins 6/6 spent 144/144)
+[ 420s] evals   630000  best escape  577s  (steps 458 traps +155 coins 6/6 spent 144/144)
+[ 430s] evals   639000  best escape  577s  (steps 458 traps +155 coins 6/6 spent 144/144)
+[ 440s] evals   654000  best escape  578s  (steps 464 traps +150 coins 6/6 spent 144/144)
+[ 450s] evals   669000  best escape  579s  (steps 460 traps +155 coins 6/6 spent 144/144)
+[ 460s] evals   684000  best escape  579s  (steps 460 traps +155 coins 6/6 spent 144/144)
+[ 470s] evals   696000  best escape  582s  (steps 468 traps +150 coins 6/6 spent 144/144)
+[ 480s] evals   711000  best escape  582s  (steps 468 traps +150 coins 6/6 spent 144/144)
+[ 490s] evals   724500  best escape  582s  (steps 468 traps +150 coins 6/6 spent 144/144)
+[ 500s] evals   738000  best escape  582s  (steps 468 traps +150 coins 6/6 spent 144/144)
+[ 510s] evals   751500  best escape  583s  (steps 474 traps +145 coins 6/6 spent 144/144)
+[ 520s] evals   766500  best escape  586s  (steps 472 traps +150 coins 6/6 spent 144/144)
+[ 530s] evals   778500  best escape  586s  (steps 472 traps +150 coins 6/6 spent 144/144)
+[ 540s] evals   789000  best escape  586s  (steps 472 traps +150 coins 6/6 spent 144/144)
+[ 550s] evals   802500  best escape  589s  (steps 470 traps +155 coins 6/6 spent 144/144)
+[ 560s] evals   816000  best escape  589s  (steps 470 traps +155 coins 6/6 spent 144/144)
+[ 570s] evals   828000  best escape  589s  (steps 470 traps +155 coins 6/6 spent 144/144)
+[ 580s] evals   843000  best escape  589s  (steps 470 traps +155 coins 6/6 spent 144/144)
+[ 590s] evals   856500  best escape  590s  (steps 476 traps +150 coins 6/6 spent 144/144)
+[ 600s] evals   871500  best escape  590s  (steps 476 traps +150 coins 6/6 spent 144/144)
+[ 610s] evals   886500  best escape  590s  (steps 476 traps +150 coins 6/6 spent 144/144)
+[ 620s] evals   898500  best escape  590s  (steps 476 traps +150 coins 6/6 spent 144/144)
+[ 630s] evals   909000  best escape  590s  (steps 476 traps +150 coins 6/6 spent 144/144)
+[ 640s] evals   924000  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 650s] evals   937500  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 660s] evals   946500  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 670s] evals   961500  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 680s] evals   976500  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 690s] evals   991500  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 700s] evals  1006500  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 710s] evals  1021500  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 720s] evals  1036500  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 730s] evals  1050000  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 740s] evals  1059000  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 750s] evals  1068000  best escape  597s  (steps 478 traps +155 coins 6/6 spent 144/144)
+[ 760s] evals  1081500  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 770s] evals  1096500  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 780s] evals  1111500  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 790s] evals  1126500  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 800s] evals  1140000  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 810s] evals  1155000  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 820s] evals  1167000  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 830s] evals  1176000  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 840s] evals  1188000  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 850s] evals  1201500  best escape  599s  (steps 480 traps +155 coins 6/6 spent 144/144)
+[ 860s] evals  1216500  best escape  600s  (steps 476 traps +160 coins 6/6 spent 144/144)
+[ 870s] evals  1231500  best escape  600s  (steps 476 traps +160 coins 6/6 spent 144/144)
+[ 880s] evals  1246500  best escape  600s  (steps 476 traps +160 coins 6/6 spent 144/144)
+[ 890s] evals  1260000  best escape  601s  (steps 482 traps +155 coins 6/6 spent 144/144)
+[ 900s] evals  1275000  best escape  601s  (steps 482 traps +155 coins 6/6 spent 144/144)
+[ 910s] evals  1275000  best escape  601s  (steps 482 traps +155 coins 6/6 spent 144/144)
+
+rules base=120 wall=1 trap=3 delay=5 income=4 bonus=6 maxCoins=6 safe=2 traps=adjacent
+result escape=601s steps=482 trapTime=155 coins=6/6 spent=144 budget=144
+S..T.....#.....#..T..
+..##..#..#..#.#..#.##
+....#..#...#..#.#.#.$
+....##.##...##.......
+......#..###.......#.
+.......#..T..#......#
+......$.#..##.#......
+...............#.....
+##.....#.#.....#.....
+..#..T..#...###....#.
+.#.T#.#.#.##...#..#..
+.....#.#.#....#.#..##
+.........#...#.#.#...
+....#..##.#.#.T..#...
+.#.#..#....T.....#...
+..#.##.$...$....T.#..
+#T.#.........#$.#.#..
+T.#........#.#.T.#...
+.#.......##.#.#.#.#..
+T.#.$..##......#..#..
+..T.....T........#..G
+
+Second run:
+[  10s] evals    15000  best escape  253s  (steps 248 traps +35 coins 5/6 spent 139/140)
+[  20s] evals    30000  best escape  316s  (steps 296 traps +50 coins 5/5 spent 139/140)
+[  30s] evals    49500  best escape  394s  (steps 354 traps +70 coins 5/5 spent 140/140)
+[  40s] evals    67500  best escape  403s  (steps 364 traps +75 coins 6/6 spent 142/144)
+[  50s] evals    82500  best escape  422s  (steps 362 traps +90 coins 5/5 spent 140/140)
+[  60s] evals    96000  best escape  431s  (steps 386 traps +75 coins 5/5 spent 139/140)
+[  70s] evals   111000  best escape  448s  (steps 394 traps +90 coins 6/6 spent 143/144)
+[  80s] evals   129000  best escape  457s  (steps 398 traps +95 coins 6/6 spent 143/144)
+[  90s] evals   144000  best escape  473s  (steps 404 traps +105 coins 6/6 spent 142/144)
+[ 100s] evals   159000  best escape  483s  (steps 414 traps +105 coins 6/6 spent 144/144)
+[ 110s] evals   174000  best escape  499s  (steps 430 traps +105 coins 6/6 spent 144/144)
+[ 120s] evals   189000  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 130s] evals   204000  best escape  510s  (steps 426 traps +120 coins 6/6 spent 144/144)
+[ 140s] evals   220500  best escape  511s  (steps 432 traps +115 coins 6/6 spent 144/144)
+[ 150s] evals   235500  best escape  519s  (steps 430 traps +125 coins 6/6 spent 143/144)
+[ 160s] evals   252000  best escape  525s  (steps 436 traps +125 coins 6/6 spent 144/144)
+[ 170s] evals   267000  best escape  530s  (steps 436 traps +130 coins 6/6 spent 144/144)
+[ 180s] evals   283500  best escape  534s  (steps 430 traps +140 coins 6/6 spent 144/144)
+[ 190s] evals   298500  best escape  534s  (steps 430 traps +140 coins 6/6 spent 144/144)
+[ 200s] evals   313500  best escape  543s  (steps 434 traps +145 coins 6/6 spent 144/144)
+[ 210s] evals   328500  best escape  546s  (steps 452 traps +130 coins 6/6 spent 144/144)
+[ 220s] evals   345000  best escape  550s  (steps 456 traps +130 coins 6/6 spent 144/144)
+[ 230s] evals   363000  best escape  560s  (steps 466 traps +130 coins 6/6 spent 143/144)
+[ 240s] evals   378000  best escape  566s  (steps 472 traps +130 coins 6/6 spent 144/144)
+[ 250s] evals   393000  best escape  568s  (steps 474 traps +130 coins 6/6 spent 144/144)
+[ 260s] evals   408000  best escape  576s  (steps 472 traps +140 coins 6/6 spent 144/144)
+[ 270s] evals   424500  best escape  576s  (steps 472 traps +140 coins 6/6 spent 144/144)
+[ 280s] evals   441000  best escape  579s  (steps 470 traps +145 coins 6/6 spent 144/144)
+[ 290s] evals   456000  best escape  582s  (steps 478 traps +140 coins 6/6 spent 144/144)
+[ 300s] evals   469500  best escape  582s  (steps 478 traps +140 coins 6/6 spent 144/144)
+[ 310s] evals   484500  best escape  585s  (steps 476 traps +145 coins 6/6 spent 144/144)
+[ 320s] evals   499500  best escape  585s  (steps 476 traps +145 coins 6/6 spent 144/144)
+[ 330s] evals   514500  best escape  589s  (steps 480 traps +145 coins 6/6 spent 143/144)
+[ 340s] evals   523500  best escape  589s  (steps 480 traps +145 coins 6/6 spent 143/144)
+[ 350s] evals   538500  best escape  589s  (steps 480 traps +145 coins 6/6 spent 143/144)
+[ 360s] evals   550500  best escape  591s  (steps 482 traps +145 coins 6/6 spent 144/144)
+[ 370s] evals   562500  best escape  591s  (steps 482 traps +145 coins 6/6 spent 144/144)
+[ 380s] evals   574500  best escape  591s  (steps 482 traps +145 coins 6/6 spent 144/144)
+[ 390s] evals   589500  best escape  591s  (steps 482 traps +145 coins 6/6 spent 144/144)
+[ 400s] evals   604500  best escape  593s  (steps 484 traps +145 coins 6/6 spent 144/144)
+[ 410s] evals   619500  best escape  593s  (steps 484 traps +145 coins 6/6 spent 144/144)
+[ 420s] evals   633000  best escape  593s  (steps 484 traps +145 coins 6/6 spent 144/144)
+[ 430s] evals   646500  best escape  595s  (steps 486 traps +145 coins 6/6 spent 144/144)
+[ 440s] evals   660000  best escape  598s  (steps 484 traps +150 coins 6/6 spent 144/144)
+[ 450s] evals   675000  best escape  598s  (steps 484 traps +150 coins 6/6 spent 144/144)
+[ 460s] evals   684000  best escape  600s  (steps 486 traps +150 coins 6/6 spent 144/144)
+[ 470s] evals   694500  best escape  600s  (steps 486 traps +150 coins 6/6 spent 144/144)
+[ 480s] evals   709500  best escape  600s  (steps 486 traps +150 coins 6/6 spent 144/144)
+[ 490s] evals   724500  best escape  600s  (steps 486 traps +150 coins 6/6 spent 144/144)
+[ 500s] evals   739500  best escape  600s  (steps 486 traps +150 coins 6/6 spent 144/144)
+[ 510s] evals   750000  best escape  602s  (steps 488 traps +150 coins 6/6 spent 144/144)
+[ 520s] evals   765000  best escape  602s  (steps 488 traps +150 coins 6/6 spent 144/144)
+[ 530s] evals   775500  best escape  602s  (steps 488 traps +150 coins 6/6 spent 144/144)
+[ 540s] evals   786000  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 550s] evals   799500  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 560s] evals   814500  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 570s] evals   829500  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 580s] evals   843000  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 590s] evals   856500  best escape  604s  (steps 490 traps +150 coins 6/6 spent 144/144)
+[ 600s] evals   870000  best escape  606s  (steps 492 traps +150 coins 6/6 spent 144/144)
+[ 610s] evals   880500  best escape  606s  (steps 492 traps +150 coins 6/6 spent 144/144)
+[ 620s] evals   894000  best escape  606s  (steps 492 traps +150 coins 6/6 spent 144/144)
+[ 630s] evals   906000  best escape  606s  (steps 492 traps +150 coins 6/6 spent 144/144)
+[ 640s] evals   919500  best escape  606s  (steps 492 traps +150 coins 6/6 spent 144/144)
+[ 650s] evals   934500  best escape  608s  (steps 494 traps +150 coins 6/6 spent 144/144)
+[ 660s] evals   949500  best escape  608s  (steps 494 traps +150 coins 6/6 spent 144/144)
+[ 670s] evals   963000  best escape  608s  (steps 494 traps +150 coins 6/6 spent 144/144)
+[ 680s] evals   978000  best escape  609s  (steps 490 traps +155 coins 6/6 spent 144/144)
+[ 690s] evals   990000  best escape  610s  (steps 496 traps +150 coins 6/6 spent 144/144)
+[ 700s] evals  1002000  best escape  610s  (steps 496 traps +150 coins 6/6 spent 144/144)
+[ 710s] evals  1014000  best escape  610s  (steps 496 traps +150 coins 6/6 spent 144/144)
+[ 720s] evals  1027500  best escape  610s  (steps 496 traps +150 coins 6/6 spent 144/144)
+[ 730s] evals  1039500  best escape  612s  (steps 488 traps +160 coins 6/6 spent 144/144)
+[ 740s] evals  1054500  best escape  612s  (steps 488 traps +160 coins 6/6 spent 144/144)
+[ 750s] evals  1069500  best escape  614s  (steps 500 traps +150 coins 6/6 spent 144/144)
+[ 760s] evals  1084500  best escape  614s  (steps 500 traps +150 coins 6/6 spent 144/144)
+[ 770s] evals  1096500  best escape  614s  (steps 500 traps +150 coins 6/6 spent 144/144)
+[ 780s] evals  1111500  best escape  614s  (steps 500 traps +150 coins 6/6 spent 144/144)
+[ 790s] evals  1123500  best escape  614s  (steps 500 traps +150 coins 6/6 spent 144/144)
+[ 800s] evals  1134000  best escape  615s  (steps 486 traps +165 coins 6/6 spent 144/144)
+[ 810s] evals  1146000  best escape  615s  (steps 486 traps +165 coins 6/6 spent 144/144)
+[ 820s] evals  1159500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 830s] evals  1174500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 840s] evals  1189500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 850s] evals  1204500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 860s] evals  1219500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 870s] evals  1231500  best escape  617s  (steps 488 traps +165 coins 6/6 spent 144/144)
+[ 880s] evals  1245000  best escape  618s  (steps 494 traps +160 coins 6/6 spent 144/144)
+[ 890s] evals  1257000  best escape  618s  (steps 494 traps +160 coins 6/6 spent 144/144)
+[ 900s] evals  1270500  best escape  618s  (steps 494 traps +160 coins 6/6 spent 144/144)
+[ 910s] evals  1270500  best escape  618s  (steps 494 traps +160 coins 6/6 spent 144/144)
+
+rules base=120 wall=1 trap=3 delay=5 income=4 bonus=6 maxCoins=6 safe=2 traps=adjacent
+result escape=618s steps=494 trapTime=160 coins=6/6 spent=144 budget=144
+S..............#.....
+#..#........#.#....##
+$...#......#..#.#.#.$
+....##.##...##...#...
+......#..###.........
+.......#..T..#..#....
+......$.#..##.#..#.T.
+...........#.T.#..#.#
+.........#....#....#.
+#.#T.T..#...###......
+.#..#.#.#.##...#.....
+.....#.#.#....#.#....
+......T..#...#...#...
+.....#.##.#.#.T..#...
+......#.$.#T.#...#...
+....##.....$....T.#..
+#T.#.........#$##.#..
+T.#.....#.##.#.T.#...
+.#...##.##..#.#.#.#..
+..#....#.......#.T#..
+..T.....T..#.....#..G
+
+[  10s] evals    15000  best escape  253s  (steps 248 traps +35 coins 5/6 spent 139/140)
+[  20s] evals    30000  best escape  316s  (steps 296 traps +50 coins 5/5 spent 139/140)
+[  30s] evals    45000  best escape  373s  (steps 334 traps +75 coins 6/6 spent 144/144)
+[  40s] evals    63000  best escape  403s  (steps 364 traps +75 coins 6/6 spent 142/144)
+[  50s] evals    82500  best escape  422s  (steps 362 traps +90 coins 5/5 spent 140/140)
+[  60s] evals    99000  best escape  435s  (steps 376 traps +95 coins 6/6 spent 142/144)
+[  70s] evals   114000  best escape  456s  (steps 392 traps +100 coins 6/6 spent 143/144)
+[  80s] evals   130500  best escape  460s  (steps 390 traps +100 coins 5/5 spent 140/140)
+[  90s] evals   145500  best escape  475s  (steps 406 traps +105 coins 6/6 spent 144/144)
+[ 100s] evals   160500  best escape  485s  (steps 416 traps +105 coins 6/6 spent 143/144)
+[ 110s] evals   175500  best escape  500s  (steps 396 traps +140 coins 6/6 spent 144/144)
+[ 120s] evals   190500  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 130s] evals   204000  best escape  508s  (steps 394 traps +150 coins 6/6 spent 144/144)
+[ 140s] evals   219000  best escape  517s  (steps 428 traps +125 coins 6/6 spent 143/144)
+[ 150s] evals   234000  best escape  521s  (steps 432 traps +125 coins 6/6 spent 144/144)
+[ 160s] evals   249000  best escape  527s  (steps 428 traps +135 coins 6/6 spent 144/144)
+[ 170s] evals   262500  best escape  528s  (steps 424 traps +140 coins 6/6 spent 144/144)
+[ 180s] evals   277500  best escape  535s  (steps 456 traps +115 coins 6/6 spent 140/144)
+[ 190s] evals   292500  best escape  555s  (steps 466 traps +125 coins 6/6 spent 144/144)
+[ 200s] evals   307500  best escape  555s  (steps 466 traps +125 coins 6/6 spent 144/144)
+[ 210s] evals   321000  best escape  555s  (steps 466 traps +125 coins 6/6 spent 144/144)
+[ 220s] evals   336000  best escape  555s  (steps 466 traps +125 coins 6/6 spent 144/144)
+[ 230s] evals   352500  best escape  557s  (steps 468 traps +125 coins 6/6 spent 143/144)
+[ 240s] evals   367500  best escape  557s  (steps 468 traps +125 coins 6/6 spent 143/144)
+[ 250s] evals   384000  best escape  559s  (steps 470 traps +125 coins 6/6 spent 144/144)
+[ 260s] evals   399000  best escape  564s  (steps 450 traps +150 coins 6/6 spent 144/144)
+[ 270s] evals   412500  best escape  569s  (steps 450 traps +155 coins 6/6 spent 144/144)
+[ 280s] evals   427500  best escape  569s  (steps 450 traps +155 coins 6/6 spent 144/144)
+[ 290s] evals   444000  best escape  569s  (steps 450 traps +155 coins 6/6 spent 144/144)
+[ 300s] evals   459000  best escape  574s  (steps 450 traps +160 coins 6/6 spent 144/144)
+[ 310s] evals   474000  best escape  574s  (steps 450 traps +160 coins 6/6 spent 144/144)
+[ 320s] evals   489000  best escape  574s  (steps 450 traps +160 coins 6/6 spent 144/144)
+[ 330s] evals   502500  best escape  577s  (steps 458 traps +155 coins 6/6 spent 144/144)
+[ 340s] evals   516000  best escape  578s  (steps 454 traps +160 coins 6/6 spent 144/144)
+[ 350s] evals   531000  best escape  579s  (steps 460 traps +155 coins 6/6 spent 143/144)
+[ 360s] evals   546000  best escape  580s  (steps 456 traps +160 coins 6/6 spent 144/144)
+[ 370s] evals   562500  best escape  584s  (steps 460 traps +160 coins 6/6 spent 144/144)
+[ 380s] evals   579000  best escape  584s  (steps 460 traps +160 coins 6/6 spent 144/144)
+[ 390s] evals   594000  best escape  586s  (steps 472 traps +150 coins 6/6 spent 144/144)
+[ 400s] evals   609000  best escape  586s  (steps 472 traps +150 coins 6/6 spent 144/144)
+[ 410s] evals   624000  best escape  588s  (steps 474 traps +150 coins 6/6 spent 144/144)
+[ 420s] evals   639000  best escape  588s  (steps 474 traps +150 coins 6/6 spent 144/144)
+[ 430s] evals   654000  best escape  588s  (steps 474 traps +150 coins 6/6 spent 144/144)
+[ 440s] evals   669000  best escape  593s  (steps 474 traps +155 coins 6/6 spent 144/144)
+[ 450s] evals   684000  best escape  594s  (steps 470 traps +160 coins 6/6 spent 144/144)
+[ 460s] evals   699000  best escape  595s  (steps 476 traps +155 coins 6/6 spent 144/144)
+[ 470s] evals   714000  best escape  596s  (steps 472 traps +160 coins 6/6 spent 144/144)
+[ 480s] evals   730500  best escape  599s  (steps 470 traps +165 coins 6/6 spent 144/144)
+[ 490s] evals   745500  best escape  599s  (steps 470 traps +165 coins 6/6 spent 144/144)
+[ 500s] evals   760500  best escape  599s  (steps 470 traps +165 coins 6/6 spent 144/144)
+[ 510s] evals   775500  best escape  599s  (steps 470 traps +165 coins 6/6 spent 144/144)
+[ 520s] evals   790500  best escape  599s  (steps 470 traps +165 coins 6/6 spent 144/144)
+[ 530s] evals   805500  best escape  600s  (steps 466 traps +170 coins 6/6 spent 144/144)
+[ 540s] evals   820500  best escape  601s  (steps 472 traps +165 coins 6/6 spent 144/144)
+[ 550s] evals   837000  best escape  601s  (steps 472 traps +165 coins 6/6 spent 144/144)
+[ 560s] evals   852000  best escape  601s  (steps 472 traps +165 coins 6/6 spent 144/144)
+[ 570s] evals   867000  best escape  601s  (steps 472 traps +165 coins 6/6 spent 144/144)
+[ 580s] evals   882000  best escape  605s  (steps 476 traps +165 coins 6/6 spent 144/144)
+[ 590s] evals   898500  best escape  605s  (steps 476 traps +165 coins 6/6 spent 144/144)
+[ 600s] evals   912000  best escape  605s  (steps 476 traps +165 coins 6/6 spent 144/144)
+[ 610s] evals   928500  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 620s] evals   943500  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 630s] evals   957000  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 640s] evals   972000  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 650s] evals   987000  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 660s] evals  1002000  best escape  607s  (steps 478 traps +165 coins 6/6 spent 144/144)
+[ 670s] evals  1017000  best escape  609s  (steps 480 traps +165 coins 6/6 spent 144/144)
+[ 680s] evals  1032000  best escape  609s  (steps 480 traps +165 coins 6/6 spent 144/144)
+[ 690s] evals  1047000  best escape  611s  (steps 482 traps +165 coins 6/6 spent 144/144)
+[ 700s] evals  1060500  best escape  611s  (steps 482 traps +165 coins 6/6 spent 144/144)
+[ 710s] evals  1075500  best escape  612s  (steps 478 traps +170 coins 6/6 spent 144/144)
+[ 720s] evals  1090500  best escape  612s  (steps 478 traps +170 coins 6/6 spent 144/144)
+[ 730s] evals  1105500  best escape  612s  (steps 478 traps +170 coins 6/6 spent 144/144)
+[ 740s] evals  1120500  best escape  613s  (steps 484 traps +165 coins 6/6 spent 144/144)
+[ 750s] evals  1135500  best escape  614s  (steps 480 traps +170 coins 6/6 spent 144/144)
+[ 760s] evals  1147500  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 770s] evals  1162500  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 780s] evals  1177500  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 790s] evals  1191000  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 800s] evals  1204500  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 810s] evals  1218000  best escape  616s  (steps 482 traps +170 coins 6/6 spent 144/144)
+[ 820s] evals  1233000  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 830s] evals  1246500  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 840s] evals  1260000  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 850s] evals  1275000  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 860s] evals  1288500  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 870s] evals  1303500  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 880s] evals  1317000  best escape  620s  (steps 486 traps +170 coins 6/6 spent 144/144)
+[ 890s] evals  1330500  best escape  622s  (steps 488 traps +170 coins 6/6 spent 144/144)
+[ 900s] evals  1345500  best escape  622s  (steps 488 traps +170 coins 6/6 spent 144/144)
+[ 910s] evals  1345500  best escape  622s  (steps 488 traps +170 coins 6/6 spent 144/144)
+
+rules base=120 wall=1 trap=3 delay=5 income=4 bonus=6 maxCoins=6 safe=2 traps=adjacent
+result escape=622s steps=488 trapTime=170 coins=6/6 spent=144 budget=144
+S.........T....#.....
+..##.....#.#..#....##
+.#..#..#.#.#..#...#.$
+.....#..#.T.##.......
+......#..###.....#.T.
+.......#.#T...#...#.#
+..$.....##.#.#.....#.
+..#.#.......#........
+##...#...#$.#....###.
+..#T..#.#...#...#...#
+.#..#.#.#.##.#.......
+.....#.#.#....#.#....
+......T..#.T.#.#.#...
+$....#.##.#.#.T..#...
+......#....T.....#...
+.#..##.....$....T.#..
+#TT#.........#$##.#..
+..#......#.#.#.T.#...
+.#......#.#.#.#.#.#..
+.......#.......#..#..
+........T....#.....#G
+
+[  10s] evals    15000  best escape  253s  (steps 248 traps +35 coins 5/6 spent 139/140)
+[  20s] evals    30000  best escape  316s  (steps 296 traps +50 coins 5/5 spent 139/140)
+[  30s] evals    48000  best escape  373s  (steps 334 traps +75 coins 6/6 spent 144/144)
+[  40s] evals    67500  best escape  403s  (steps 364 traps +75 coins 6/6 spent 142/144)
+[  50s] evals    82500  best escape  422s  (steps 362 traps +90 coins 5/5 spent 140/140)
+[  60s] evals   100500  best escape  435s  (steps 376 traps +95 coins 6/6 spent 142/144)
+[  70s] evals   117000  best escape  456s  (steps 392 traps +100 coins 6/6 spent 143/144)
+[  80s] evals   132000  best escape  460s  (steps 390 traps +100 coins 5/5 spent 140/140)
+[  90s] evals   147000  best escape  475s  (steps 406 traps +105 coins 6/6 spent 144/144)
+[ 100s] evals   162000  best escape  485s  (steps 416 traps +105 coins 6/6 spent 143/144)
+[ 110s] evals   177000  best escape  500s  (steps 396 traps +140 coins 6/6 spent 144/144)
+[ 120s] evals   192000  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 130s] evals   207000  best escape  507s  (steps 428 traps +115 coins 6/6 spent 144/144)
+[ 140s] evals   222000  best escape  513s  (steps 394 traps +155 coins 6/6 spent 144/144)
+[ 150s] evals   237000  best escape  523s  (steps 404 traps +155 coins 6/6 spent 144/144)
+[ 160s] evals   252000  best escape  523s  (steps 404 traps +155 coins 6/6 spent 144/144)
+[ 170s] evals   265500  best escape  526s  (steps 402 traps +160 coins 6/6 spent 143/144)
+[ 180s] evals   280500  best escape  530s  (steps 446 traps +120 coins 6/6 spent 144/144)
+[ 190s] evals   295500  best escape  532s  (steps 408 traps +160 coins 6/6 spent 144/144)
+[ 200s] evals   310500  best escape  539s  (steps 410 traps +165 coins 6/6 spent 144/144)
+[ 210s] evals   327000  best escape  541s  (steps 412 traps +165 coins 6/6 spent 144/144)
+[ 220s] evals   342000  best escape  541s  (steps 412 traps +165 coins 6/6 spent 144/144)
+[ 230s] evals   357000  best escape  546s  (steps 452 traps +130 coins 6/6 spent 144/144)
+[ 240s] evals   370500  best escape  552s  (steps 448 traps +140 coins 6/6 spent 144/144)
+[ 250s] evals   385500  best escape  554s  (steps 430 traps +160 coins 6/6 spent 144/144)
+[ 260s] evals   402000  best escape  559s  (steps 430 traps +165 coins 6/6 spent 144/144)
+[ 270s] evals   417000  best escape  559s  (steps 430 traps +165 coins 6/6 spent 144/144)
+[ 280s] evals   432000  best escape  560s  (steps 456 traps +140 coins 6/6 spent 144/144)
+[ 290s] evals   447000  best escape  567s  (steps 458 traps +145 coins 6/6 spent 144/144)
+[ 300s] evals   462000  best escape  568s  (steps 464 traps +140 coins 6/6 spent 143/144)
+[ 310s] evals   477000  best escape  568s  (steps 464 traps +140 coins 6/6 spent 143/144)
+[ 320s] evals   492000  best escape  573s  (steps 454 traps +155 coins 6/6 spent 144/144)
+[ 330s] evals   505500  best escape  573s  (steps 454 traps +155 coins 6/6 spent 144/144)
+[ 340s] evals   520500  best escape  576s  (steps 442 traps +170 coins 6/6 spent 144/144)
+[ 350s] evals   535500  best escape  578s  (steps 444 traps +170 coins 6/6 spent 144/144)
+[ 360s] evals   549000  best escape  582s  (steps 438 traps +180 coins 6/6 spent 144/144)
+[ 370s] evals   562500  best escape  584s  (steps 470 traps +150 coins 6/6 spent 144/144)
+[ 380s] evals   573000  best escape  584s  (steps 470 traps +150 coins 6/6 spent 144/144)
+[ 390s] evals   588000  best escape  584s  (steps 470 traps +150 coins 6/6 spent 144/144)
+[ 400s] evals   603000  best escape  588s  (steps 444 traps +180 coins 6/6 spent 144/144)
+[ 410s] evals   616500  best escape  590s  (steps 446 traps +180 coins 6/6 spent 144/144)
+[ 420s] evals   631500  best escape  590s  (steps 446 traps +180 coins 6/6 spent 144/144)
+[ 430s] evals   646500  best escape  590s  (steps 446 traps +180 coins 6/6 spent 144/144)
+[ 440s] evals   658500  best escape  590s  (steps 446 traps +180 coins 6/6 spent 144/144)
+[ 450s] evals   673500  best escape  594s  (steps 450 traps +180 coins 6/6 spent 144/144)
+[ 460s] evals   687000  best escape  594s  (steps 450 traps +180 coins 6/6 spent 144/144)
+[ 470s] evals   702000  best escape  594s  (steps 450 traps +180 coins 6/6 spent 144/144)
+[ 480s] evals   718500  best escape  596s  (steps 452 traps +180 coins 6/6 spent 144/144)
+[ 490s] evals   735000  best escape  596s  (steps 452 traps +180 coins 6/6 spent 144/144)
+[ 500s] evals   750000  best escape  597s  (steps 448 traps +185 coins 6/6 spent 144/144)
+[ 510s] evals   763500  best escape  598s  (steps 454 traps +180 coins 6/6 spent 144/144)
+[ 520s] evals   775500  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 530s] evals   789000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 540s] evals   804000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 550s] evals   817500  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 560s] evals   832500  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 570s] evals   847500  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 580s] evals   861000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 590s] evals   873000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 600s] evals   888000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 610s] evals   903000  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 620s] evals   916500  best escape  599s  (steps 450 traps +185 coins 6/6 spent 144/144)
+[ 630s] evals   931500  best escape  600s  (steps 446 traps +190 coins 6/6 spent 144/144)
+[ 640s] evals   946500  best escape  600s  (steps 446 traps +190 coins 6/6 spent 144/144)
+[ 650s] evals   960000  best escape  600s  (steps 446 traps +190 coins 6/6 spent 144/144)
+[ 660s] evals   972000  best escape  600s  (steps 446 traps +190 coins 6/6 spent 144/144)
+[ 670s] evals   987000  best escape  601s  (steps 452 traps +185 coins 6/6 spent 144/144)
+[ 680s] evals  1000500  best escape  602s  (steps 448 traps +190 coins 6/6 spent 144/144)
+[ 690s] evals  1015500  best escape  602s  (steps 448 traps +190 coins 6/6 spent 144/144)
+[ 700s] evals  1030500  best escape  603s  (steps 454 traps +185 coins 6/6 spent 144/144)
+[ 710s] evals  1045500  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 720s] evals  1060500  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 730s] evals  1072500  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 740s] evals  1084500  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 750s] evals  1098000  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 760s] evals  1113000  best escape  606s  (steps 452 traps +190 coins 6/6 spent 144/144)
+[ 770s] evals  1128000  best escape  608s  (steps 454 traps +190 coins 6/6 spent 144/144)
+[ 780s] evals  1141500  best escape  608s  (steps 454 traps +190 coins 6/6 spent 144/144)
+[ 790s] evals  1155000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 800s] evals  1167000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 810s] evals  1180500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 820s] evals  1195500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 830s] evals  1210500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 840s] evals  1222500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 850s] evals  1236000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 860s] evals  1249500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 870s] evals  1264500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 880s] evals  1278000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 890s] evals  1291500  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 900s] evals  1302000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+[ 910s] evals  1302000  best escape  610s  (steps 456 traps +190 coins 6/6 spent 144/144)
+
+rules base=120 wall=1 trap=3 delay=5 income=4 bonus=6 maxCoins=6 safe=2 traps=adjacent
+result escape=610s steps=456 trapTime=190 coins=6/6 spent=144 budget=144
+S.....#..............
+.....#...............
+......#..#.....#...$.
+.......#..#.....#$.#.
+......##.T.#..$#..#..
+........#.T.##..##.T.
+.......#...#..#...#..
+.........##$...#...#.
+.........#.#....#..#.
+.#...#..#.T.T#.T.#..#
+..##T.##.T##..#.#....
+....#T..#.$.##...#...
+...#..#..#.#..#..#...
+....#.#.....#..##....
+....$#.##..T.T#.#....
+......T..##.##.TT#...
+.....#.#...#..#.#....
+..###.#..##..#...#...
+.#....#.#...#...#....
+.....#....#.#...#....
+....#.....#T....T#..G
