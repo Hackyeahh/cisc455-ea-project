@@ -1,3 +1,4 @@
+Fifth run:
 [  10s] evals    15000  best escape  253s  (steps 248 traps +35 coins 5/6 spent 139/140)
 [  20s] evals    30000  best escape  316s  (steps 296 traps +50 coins 5/5 spent 139/140)
 [  30s] evals    45000  best escape  373s  (steps 334 traps +75 coins 6/6 spent 144/144)
